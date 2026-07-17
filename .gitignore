@@ -1,0 +1,75 @@
+# Unity generated
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.idea/
+*.DotSettings.user
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Unity3D generated meta noise (keep meta for assets)
+sysinfo.txt
+*.stackdump
+
+# Builds & packages
+*.apk
+*.aab
+*.unitypackage
+*.app
+*.ipa
+*.symbols.zip
+
+# Crashlytics / Firebase local
+crashlytics-build.properties
+firebase_cpp_sdk_unity/
+
+# Secrets — NEVER commit
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+**/Secrets/
+**/secrets/
+.env
+.env.*
+!.env.example
+
+# Local extract / tooling cache
+_gdd_extract.txt
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Addressables local build cache
+ServerData/
+AddressablesBuild/
+Assets/AddressableAssetsData/*/addressables_content_state.bin
