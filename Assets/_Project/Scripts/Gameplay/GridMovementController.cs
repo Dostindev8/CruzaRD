@@ -7,7 +7,8 @@ using UnityEngine.InputSystem;
 
 namespace CruzaRD.Gameplay
 {
-    public enum MoveDirection
+    /// <summary>Named GridMoveDirection to avoid clash with UnityEngine.EventSystems.MoveDirection.</summary>
+    public enum GridMoveDirection
     {
         None,
         Forward,
@@ -39,7 +40,7 @@ namespace CruzaRD.Gameplay
         private Vector3 _targetWorld;
         private float _moveT;
         private bool _isMoving;
-        private MoveDirection _bufferedDir = MoveDirection.None;
+        private GridMoveDirection _bufferedDir = GridMoveDirection.None;
         private float _bufferExpiry = -1f;
 
         private Vector2 _pointerStart;
@@ -81,9 +82,9 @@ namespace CruzaRD.Gameplay
             TickMovement();
         }
 
-        public void RequestMove(MoveDirection dir)
+        public void RequestMove(GridMoveDirection dir)
         {
-            if (dir == MoveDirection.None)
+            if (dir == GridMoveDirection.None)
                 return;
 
             if (!_isMoving)
@@ -103,13 +104,13 @@ namespace CruzaRD.Gameplay
             if (keyboard != null)
             {
                 if (keyboard.wKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame)
-                    RequestMove(MoveDirection.Forward);
+                    RequestMove(GridMoveDirection.Forward);
                 if (keyboard.sKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame)
-                    RequestMove(MoveDirection.Backward);
+                    RequestMove(GridMoveDirection.Backward);
                 if (keyboard.aKey.wasPressedThisFrame || keyboard.leftArrowKey.wasPressedThisFrame)
-                    RequestMove(MoveDirection.Left);
+                    RequestMove(GridMoveDirection.Left);
                 if (keyboard.dKey.wasPressedThisFrame || keyboard.rightArrowKey.wasPressedThisFrame)
-                    RequestMove(MoveDirection.Right);
+                    RequestMove(GridMoveDirection.Right);
             }
 
             var touch = Touchscreen.current;
@@ -153,19 +154,19 @@ namespace CruzaRD.Gameplay
                 return;
 
             if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
-                RequestMove(delta.x > 0 ? MoveDirection.Right : MoveDirection.Left);
+                RequestMove(delta.x > 0 ? GridMoveDirection.Right : GridMoveDirection.Left);
             else
-                RequestMove(delta.y > 0 ? MoveDirection.Forward : MoveDirection.Backward);
+                RequestMove(delta.y > 0 ? GridMoveDirection.Forward : GridMoveDirection.Backward);
         }
 
         private void TickMovement()
         {
             if (!_isMoving)
             {
-                if (_bufferedDir != MoveDirection.None && Time.unscaledTime <= _bufferExpiry)
+                if (_bufferedDir != GridMoveDirection.None && Time.unscaledTime <= _bufferExpiry)
                 {
                     var dir = _bufferedDir;
-                    _bufferedDir = MoveDirection.None;
+                    _bufferedDir = GridMoveDirection.None;
                     TryBeginMove(dir);
                 }
                 return;
@@ -186,24 +187,25 @@ namespace CruzaRD.Gameplay
 
             transform.position = _targetWorld;
             _isMoving = false;
+            EventBus.Publish(new PlayerMoveEvent(false, false));
 
-            if (_bufferedDir != MoveDirection.None && Time.unscaledTime <= _bufferExpiry)
+            if (_bufferedDir != GridMoveDirection.None && Time.unscaledTime <= _bufferExpiry)
             {
                 var dir = _bufferedDir;
-                _bufferedDir = MoveDirection.None;
+                _bufferedDir = GridMoveDirection.None;
                 TryBeginMove(dir);
             }
         }
 
-        private bool TryBeginMove(MoveDirection dir)
+        private bool TryBeginMove(GridMoveDirection dir)
         {
             var next = _gridPos;
             switch (dir)
             {
-                case MoveDirection.Forward: next.y += 1; break;
-                case MoveDirection.Backward: next.y = Mathf.Max(0, next.y - 1); break;
-                case MoveDirection.Left: next.x -= 1; break;
-                case MoveDirection.Right: next.x += 1; break;
+                case GridMoveDirection.Forward: next.y += 1; break;
+                case GridMoveDirection.Backward: next.y = Mathf.Max(0, next.y - 1); break;
+                case GridMoveDirection.Left: next.x -= 1; break;
+                case GridMoveDirection.Right: next.x += 1; break;
                 default: return false;
             }
 
@@ -217,7 +219,9 @@ namespace CruzaRD.Gameplay
             _moveT = 0f;
             _isMoving = true;
 
-            if (dir == MoveDirection.Forward && GameManager.Instance != null)
+            EventBus.Publish(new PlayerMoveEvent(true, dir == GridMoveDirection.Forward));
+
+            if (dir == GridMoveDirection.Forward && GameManager.Instance != null)
                 GameManager.Instance.RegisterForwardStep();
 
             return true;
@@ -228,7 +232,7 @@ namespace CruzaRD.Gameplay
             _gridPos = new Vector2Int(0, 0);
             SnapToGridImmediate();
             TractionMultiplier = 1f;
-            _bufferedDir = MoveDirection.None;
+            _bufferedDir = GridMoveDirection.None;
             _isMoving = false;
         }
 

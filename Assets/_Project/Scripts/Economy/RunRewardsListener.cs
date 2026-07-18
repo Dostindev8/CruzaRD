@@ -17,6 +17,14 @@ namespace CruzaRD.Economy
             if (!ServiceLocator.TryGet<IEconomyService>(out var eco))
                 return;
 
+            // Anti-cheat v3 (GDD v3 §13.2): recompensa solo si los valores son plausibles.
+            if (ServiceLocator.TryGet<ISecurityService>(out var securityService))
+            {
+                var duration = GameManager.Instance != null ? GameManager.Instance.RunDurationSeconds : 1f;
+                if (!securityService.ValidateRunRewards(e.Score, e.DistanceMeters, duration))
+                    return;
+            }
+
             var grant = Mathf.Max(1, e.PapeletasCollected + e.DistanceMeters / 10);
             eco.Grant(CurrencyIds.Papeletas, grant, "run_reward");
 

@@ -18,6 +18,8 @@ namespace CruzaRD.UI.Screens
         [SerializeField] private Slider _ambienceSlider;
         [SerializeField] private Slider _voiceSlider;
         [SerializeField] private Toggle _dpadToggle;
+        [SerializeField] private Toggle _hapticsToggle;      // GDD v3 §5.2
+        [SerializeField] private Toggle _reduceMotionToggle; // GDD v3 §11.4
         [SerializeField] private Button _closeButton;
         [SerializeField] private Button _privacyButton;
         [SerializeField] private TMP_Dropdown _languageDropdown;
@@ -39,6 +41,8 @@ namespace CruzaRD.UI.Screens
             if (_ambienceSlider != null) _ambienceSlider.onValueChanged.AddListener(v => SetBus(AudioBus.Ambience, v));
             if (_voiceSlider != null) _voiceSlider.onValueChanged.AddListener(v => SetBus(AudioBus.Voice, v));
             if (_dpadToggle != null) _dpadToggle.onValueChanged.AddListener(OnDpadToggle);
+            if (_hapticsToggle != null) _hapticsToggle.onValueChanged.AddListener(OnHapticsToggle);
+            if (_reduceMotionToggle != null) _reduceMotionToggle.onValueChanged.AddListener(OnReduceMotionToggle);
             if (_languageDropdown != null) _languageDropdown.onValueChanged.AddListener(OnLanguage);
         }
 
@@ -64,6 +68,8 @@ namespace CruzaRD.UI.Screens
             if (_ambienceSlider != null) _ambienceSlider.SetValueWithoutNotify(s.AmbienceVolume);
             if (_voiceSlider != null) _voiceSlider.SetValueWithoutNotify(s.VoiceVolume);
             if (_dpadToggle != null) _dpadToggle.SetIsOnWithoutNotify(s.UseOnScreenDpad);
+            if (_hapticsToggle != null) _hapticsToggle.SetIsOnWithoutNotify(s.HapticsEnabled);
+            if (_reduceMotionToggle != null) _reduceMotionToggle.SetIsOnWithoutNotify(s.ReduceMotion);
 
             ApplyDpad(s.UseOnScreenDpad);
             AudioManager.Instance?.ApplyVolumes(s.MusicVolume, s.SfxVolume, s.AmbienceVolume, s.VoiceVolume);
@@ -94,6 +100,22 @@ namespace CruzaRD.UI.Screens
             EventBus.Publish(new SettingsChangedEvent("dpad"));
         }
 
+        private void OnHapticsToggle(bool on)
+        {
+            if (!ServiceLocator.TryGet<ISaveService>(out var save)) return;
+            save.Data.Settings.HapticsEnabled = on;
+            save.Save();
+            EventBus.Publish(new SettingsChangedEvent("haptics"));
+        }
+
+        private void OnReduceMotionToggle(bool on)
+        {
+            if (!ServiceLocator.TryGet<ISaveService>(out var save)) return;
+            save.Data.Settings.ReduceMotion = on;
+            save.Save();
+            EventBus.Publish(new SettingsChangedEvent("reduce_motion"));
+        }
+
         private static void ApplyDpad(bool on)
         {
             var dpad = Object.FindFirstObjectByType<OnScreenDpad>(FindObjectsInactive.Include);
@@ -114,7 +136,8 @@ namespace CruzaRD.UI.Screens
         }
 
         public void Bind(GameObject root, Slider music, Slider sfx, Slider ambience, Slider voice,
-            Toggle dpad, Button close, Button privacy, TMP_Dropdown language)
+            Toggle dpad, Button close, Button privacy, TMP_Dropdown language,
+            Toggle haptics = null, Toggle reduceMotion = null)
         {
             _root = root;
             _musicSlider = music;
@@ -122,6 +145,8 @@ namespace CruzaRD.UI.Screens
             _ambienceSlider = ambience;
             _voiceSlider = voice;
             _dpadToggle = dpad;
+            _hapticsToggle = haptics;
+            _reduceMotionToggle = reduceMotion;
             _closeButton = close;
             _privacyButton = privacy;
             _languageDropdown = language;

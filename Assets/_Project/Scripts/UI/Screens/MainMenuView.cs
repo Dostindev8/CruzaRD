@@ -29,13 +29,15 @@ namespace CruzaRD.UI.Screens
 
         private void OnEnable()
         {
-            EventBus.Subscribe<GameStartedEvent>(_ => Hide());
+            EventBus.Subscribe<GameStartedEvent>(OnGameStarted);
         }
 
         private void OnDisable()
         {
-            EventBus.Unsubscribe<GameStartedEvent>(_ => Hide());
+            EventBus.Unsubscribe<GameStartedEvent>(OnGameStarted);
         }
+
+        private void OnGameStarted(GameStartedEvent _) => Hide();
 
         public void Show()
         {

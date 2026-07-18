@@ -1,0 +1,527 @@
+CRUZA RD
+¡QUÍTATE DEL MEDIO!
+Documento de Ejecución y Auditoría de Calidad — v3.0
+Benchmark Competitivo · Game Feel · Seguridad ISO/OWASP · UX Nivel AAA
+MOTOR
+ESTÁNDAR DE CALIDAD
+VERSIÓN DEL DOCUMENTO
+Unity 6 + C#
+Producción AAA-mobile · Full Responsive
+3.0 — Edición Auditoría & Excelencia
+Documento confidencial de producción — Uso interno del equipo de desarrollo
+
+-- 1 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 2
+Índice del Documento
+01 Resumen Ejecutivo y Diagnóstico del Estado Actual
+02 Benchmark Competitivo — Subway Surfers, Temple Run, Crossy Road
+03 Visión y Estándar de Calidad (Nivel AAA-Mobile)
+04 Gameplay Core y Sistema de Movimiento — Versión Mejorada
+05 Especificación de Animación y Game Feel
+06 Personajes y Personalización
+07 Mundo, Mapas y Biomas
+08 Progresión, Economía y Coleccionables
+09 Dirección de Arte — Estilo Low-Poly Dominicano
+10 Audio y Ambientación Sonora
+11 UI/UX Full Responsive — Nivel de Pulido AAA
+12 Arquitectura Técnica — Unity 6 + C#
+13 Seguridad y Auditoría — ISO 27001 / OWASP MASVS
+14 Módulos del Sistema (detallado)
+15 Monetización Ética
+16 Cumplimiento, Legal e Imagen
+17 Plan de Ejecución por Fases — Actualizado
+18 QA, Testing, Rendimiento y Auditoría de Calidad
+19 Distribución — Google Play y App Store
+20 Riesgos y Mitigación
+21 Métricas de Éxito (KPIs)
+22 Roadmap Post-Lanzamiento
+23 Apéndice — Mega-Prompt Maestro para Cursor y Agentes IA
+
+-- 2 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 3
+01 Resumen Ejecutivo y Diagnóstico del Estado
+Actual
+Cruza RD pasa de prototipo gris a producto de calidad AAA-mobile: mismo corazón de juego, estándar de
+ejecución completamente elevado.
+Esta versión 3.0 del documento parte de una revisión honesta del estado actual del proyecto en Unity. La build
+revisada muestra únicamente una forma geométrica plana (un trapezoide magenta sin textura, sin personaje, sin
+entorno, sin animación) dentro del marco de un teléfono — es decir, el proyecto está todavía en una etapa de
+placeholder muy temprana, no en un estado de "demo jugable" real. Este documento existe para cerrar esa
+brecha de forma definitiva: convertir ese placeholder en un juego completo, pulido y competitivo con los mejores
+endless-runners del mercado.
+n DIAGNÓSTICO CRÍTICO: la build actual no cuenta con geometría 3D real, personaje visible, animación,
+iluminación, ni HUD funcional. Antes de continuar cualquier feature nueva, el proyecto debe regresar a un Fase 1
+reforzada (prototipo gris correctamente ejecutado con formas 3D reales — cápsulas, cubos con profundidad, no
+sprites planos) y avanzar desde ahí siguiendo estrictamente las secciones de este documento.
+1.1 · Qué cambia en esta versión 3.0
+• Benchmark competitivo formal contra Subway Surfers, Temple Run y Crossy Road (sección 02) para fijar el
+techo de calidad que Cruza RD debe alcanzar o superar.
+• Especificación completa de animación y game feel (sección 05) — lo que la build actual no tiene en
+absoluto.
+• Sección de seguridad y auditoría tipo ISO 27001 / OWASP MASVS (sección 13) — protección de datos,
+anti-cheat, hardening de builds.
+• UI/UX elevado a estándar de pulido tipo GTA/AAA-mobile (sección 11) — micro-interacciones, feedback
+visual, transiciones.
+• Plan de fases actualizado que exige volver a validar la Fase 1 antes de avanzar, dado el estado real del
+proyecto.
+Campo Detalle
+Nombre del proyecto Cruza RD — ¡Quítate del Medio!
+Género Endless Crosser / Arcade 3D — nivel de calidad Subway Surfers / Temple Run
+Motor Unity 6 (C#)
+Estado actual verificado Placeholder plano sin geometría 3D, animación ni HUD — requiere reinicio de Fase 1
+Estándar objetivo Producción AAA-mobile: 60 FPS, full responsive, seguridad auditada, UX de alto pulido
+Plataformas objetivo Android e iOS — Full Responsive (teléfonos y tablets)
+
+-- 3 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 4
+02 Benchmark Competitivo
+Antes de construir, se analizan los tres referentes obligados del género para extraer estándares concretos y
+medibles que Cruza RD debe igualar o superar en su propia identidad dominicana.
+2.1 · Subway Surfers (Kiloo/SYBO)
+• Controles de 4 direcciones (swipe) con respuesta instantánea (<100ms) — el estándar de oro de input
+responsivo.
+• Feedback visual y sonoro exagerado en cada recolección (partículas, squash-and-stretch, SFX satisfactorio).
+• Progresión de personajes/tablas cosméticas constante, eventos temáticos frecuentes ligados a ciudades
+reales.
+• Cámara con ligera inclinación dinámica y motion blur sutil en alta velocidad para transmitir sensación de
+velocidad sin marear.
+• Estándar que Cruza RD debe igualar: input <100–150ms, feedback de recolección con partículas y
+squash-and-stretch en cada ítem cultural.
+2.2 · Temple Run (Imangi Studios)
+• Cámara en tercera persona más cercana, sensación de profundidad y riesgo mayor (curvas, giros, caídas).
+• Uso de tilt/inclinación del dispositivo como input opcional — a evaluar como extra en Cruza RD si el testing lo
+favorece.
+• Muerte con cámara lenta dramática ("death cam") que convierte el fracaso en un momento memorable en vez
+de frustrante.
+• Estándar que Cruza RD debe igualar: una secuencia de muerte cinematográfica breve (0.6–1s de cámara
+lenta) antes de la pantalla de resultado, en vez de un corte seco.
+2.3 · Crossy Road (Hipster Whale)
+• Estética low-poly/voxel con altísima personalidad de personaje — la referencia visual más cercana a lo que
+Cruza RD ya persigue.
+• Movimiento estrictamente por grid/casillas, decisión clara e instantánea, sin ambigüedad de posición.
+• Humor visual en las animaciones de muerte (atropellos, caídas) tratado con tono ligero, nunca gráfico.
+• Estándar que Cruza RD debe igualar: personalidad de personaje al nivel de Crossy Road pero con identidad
+100% dominicana, y el mismo grid movement preciso sin "casi lo logré" ambiguos.
+2.4 · Tabla Comparativa de Estándares Mínimos
+Aspecto Estándar de referencia Meta para Cruza RD
+Latencia de input &lt;100–150ms (Subway Surfers) ≤150ms con buffer de 150ms — igualar
+FPS objetivo 60 FPS constante en gama media 60 FPS piso, no meta — igualar o superar
+Feedback de recolección Partículas + SFX + squash-and-stretch Igualar, con íconos culturales propios
+Secuencia de muerte Death-cam dramática (Temple Run) Cámara lenta 0.6–1s + resumen de partida
+
+-- 4 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 5
+Personalidad de personaje Alta expresividad (Crossy Road) Igualar con arquetipos dominicanos originales
+Sesión promedio 30–90 segundos por partida Igualar — diseño ya alineado en el GDD base
+
+-- 5 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 6
+03 Visión y Estándar de Calidad (Nivel
+AAA-Mobile)
+La visión original de Cruza RD se mantiene intacta — el juego móvil dominicano más divertido y auténtico jamás
+lanzado — pero el estándar de ejecución se eleva explícitamente a nivel de pulido AAA-mobile: cada pantalla,
+transición, animación y sonido debe sentirse tan cuidado como en un título de estudio grande, no como un
+prototipo de estudiante.
+3.1 · Pilares de Diseño (reforzados)
+• Identidad auténtica — cultura dominicana genuina, sin clichés vacíos.
+• Controles instantáneos e infalibles — cero ambigüedad de carril, cero input perdido.
+• Cada acción tiene reacción visible — nada ocurre en el juego sin una señal visual, sonora o háptica.
+• Rendimiento por encima de todo — 60 FPS estables incluso en gama media-baja.
+• Seguridad y confianza del jugador — datos protegidos, economía a prueba de manipulación, cero
+vulnerabilidades conocidas al lanzar.
+• Monetización que nunca rompe la diversión — igual que en la versión anterior del documento, sin
+concesiones.
+3.2 · Definición de "Nivel GTA" aplicada a un mobile-arcade
+El jugador no espera la escala de un GTA en un endless-runner — pero sí espera su mismo nivel de pulido de
+detalle: transiciones de cámara suaves, sonido ambiental que reacciona al entorno, menús con personalidad
+visual propia (no plantillas genéricas), y una sensación de "mundo vivo" incluso en un espacio de juego
+compacto. Esta sección traduce ese estándar a decisiones concretas de UI/UX (sección 11) y de animación
+(sección 05).
+04 Gameplay Core — Versión Mejorada
+La mecánica central de cruce por carriles se mantiene (ver GDD v2.0 §3), reforzada con los estándares del
+benchmark de la sección 02:
+• Input táctil por swipe con umbral calibrado por tamaño de pantalla, buffer de 150ms — validado contra el
+estándar Subway Surfers.
+• Nuevo: secuencia de muerte cinematográfica — cámara lenta de 0.6–1s con acercamiento breve al momento
+del impacto, seguida de transición suave a pantalla de resultado (inspirado en Temple Run, sin violencia
+gráfica).
+• Nuevo: sistema de "near-miss" (casi-atropello) que otorga puntos bonus y un micro-shake de cámara + SFX
+distintivo cuando el jugador esquiva un vehículo por muy poco margen — mecánica clave de tensión en el
+género.
+• Cámara dinámica con look-ahead, FOV adaptativo por aspect ratio, y ahora micro-inclinación sutil en
+curvas/cambios de carril rápidos para transmitir velocidad sin generar mareo.
+• Escalado dinámico de dificultad ajustado por distancia recorrida, con Firebase Remote Config para tuning en
+vivo post-lanzamiento.
+
+-- 6 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 7
+Toda la matriz de obstáculos, recolectables y biomas definida en el GDD v2.0 (secciones 3.3, 3.4, y 5) se
+mantiene vigente sin cambios — sigue siendo la base de diseño correcta. Ver documento anterior para el detalle
+completo; este documento v3.0 se enfoca en elevar la ejecución, no en rediseñar el core.
+
+-- 7 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 8
+05 Especificación de Animación y Game Feel
+Esta es la sección que la build actual (ver diagnóstico, sección 01) no cumple en absoluto: cero animación visible
+en el estado revisado. Se especifica aquí de forma exhaustiva para que no quede ambigüedad al implementarla.
+5.1 · Set Mínimo de Animaciones del Personaje
+Estado Descripción Duración / Loop
+Idle Respiración sutil, balanceo de brazos, parpadeo ocasional Loop 2–3s
+Run (carril) Ciclo de correr con rebote de cámara sincronizado Loop 0.4–0.5s por ciclo
+Lane Switch Inclinación lateral del torso + paso cruzado al cambiar de carril 0.12–0.18s (sincronizado a movimiento)
+Jump/Dodge Salto/esquive con anticipación (squash) y aterrizaje (stretch) 0.25–0.35s
+Near-Miss Reaction Mueca breve de susto + micro-inclinación hacia atrás 0.15s
+Collect (ítem normal) Extensión breve de brazo + sonrisa 0.2s, no interrumpe el correr
+Collect (power-up) Pose de "hype" corta con efecto de partícula sobre el personaje 0.4s
+Death/Impact Reacción de impacto estilizada, nunca gráfica ni violenta explícita 0.6–1s con cámara lenta
+Victoria (fin de misión) Pose de celebración con bandera/gesto característico 1–1.5s, no repetible en loop
+5.2 · Principios de Game Feel ("Juice")
+• Squash and stretch en cada aterrizaje, salto y recolección — nunca movimiento rígido tipo maniquí.
+• Anticipación antes de cada acción importante (una micro-pausa de 2–4 frames antes del salto, por ejemplo)
+para que el input se sienta intencional.
+• Screen shake calibrado: sutil en near-miss, moderado en impacto de power-up, nunca tan fuerte que rompa
+la legibilidad del carril.
+• Partículas de recolección únicas por categoría de ítem (papeletas: destello dorado; pica pollo: chispas
+naranjas; café: vapor ascendente) — nunca el mismo efecto genérico repetido para todo.
+• Feedback háptico (vibración) corto y distinto para: recolección de power-up, near-miss, e impacto — usando
+la API de Haptics de Unity, con opción de desactivar en Ajustes.
+• Transiciones de cámara suaves entre menú y gameplay (nunca un corte seco) — fade + leve zoom de
+0.3–0.4s.
+5.3 · Requisitos Técnicos de Animación
+• Rig humanoide estándar de Unity (Humanoid Avatar) para poder reutilizar animaciones entre distintos
+personajes/skins sin re-trabajo.
+• Animator Controller con Blend Trees para transición fluida entre idle/run/lane-switch sin "pop" visual.
+• Animaciones capturadas o creadas a 30fps, interpoladas a 60fps en runtime (ver GDD v2.0 §7.3).
+
+-- 8 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 9
+• Root Motion desactivado para el movimiento de carril (el movimiento lo controla el sistema de grid, la
+animación es puramente visual) — evita desincronización entre posición lógica y visual.
+
+-- 9 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 10
+06 Personajes y Personalización
+n Recordatorio vigente: ninguna figura pública real sin licencia documentada de imagen, voz y marca. Elenco
+100% de personajes originales inspirados en arquetipos dominicanos.
+• Elenco base: motoconchista, colmadero, estudiante universitario, pelotero de barrio, artista urbano, chef de
+fritura — cada uno con animaciones idle y frases propias (ver especificación completa de animación en sección
+05).
+• Skins, accesorios (gorras, mochilas, tenis, lentes) y monturas cosméticas (patineta, bicicleta, scooter)
+desbloqueables sin afectar balance de juego.
+• Cada personaje nuevo debe cumplir el set mínimo de animación de la sección 5.1 antes de integrarse — cero
+personaje "a medias".
+07 Mundo, Mapas y Biomas
+Bioma Elementos distintivos
+Zona Colonial (Santo Domingo) Calles adoquinadas, turistas, carros de caballos
+Malecón Tráfico denso, ciclovía, vendedores de coco frío
+Santiago Monumento, mercado, tráfico de motoconchos intenso
+Punta Cana Arena, cocoteros, buggies, resorts de fondo
+Jarabacoa Corrientes de agua, troncos flotantes, niebla ligera
+Barrios Colmados, cables cruzados, niños jugando vitilla
+Playas Olas con temporizador, sombrillas, vendedores ambulantes
+Montañas Terreno irregular, niebla, menor visibilidad
+08 Progresión, Economía y Coleccionables
+• Bucle: jugar → acumular papeletas/trofeos → desbloquear → misiones diarias/semanales → clasificación
+mundial → repetir.
+• Soft currency (papeletas) y hard currency (trofeos especiales) con validación server-side (ver sección 13,
+seguridad de economía).
+• Eventos de temporada: Navidad, Carnaval, Independencia (27 de febrero), Verano.
+
+-- 10 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 11
+09 Dirección de Arte — Low-Poly Dominicano
+Uso Color de referencia
+Azul bandera / UI primaria #002D62
+Rojo bandera / acentos de acción #CE1126
+Dorado / recompensas #F5A623
+Verde tropical / vegetación #1E8E5A
+Cian caribeño / agua #2FB6C9
+• Presupuesto de polígonos: personajes 3,000–6,000 tris; vehículos 1,500–3,000; props 200–1,200.
+• Atlas de texturas compartido por bioma, máx. 2 atlas de 2048×2048, objetivo <60 draw calls por escena.
+• LOD automático desde 15m de distancia de cámara; iluminación horneada por bioma.
+10 Audio y Ambientación Sonora
+• Música: base rítmica inspirada en merengue/dembow en gameplay, versión chill en menú.
+• SFX de recolección únicos por ítem, con capas de sonido urbano dominicano ambientadas por bioma.
+• Voces genéricas del personaje, sin atribución a persona real, con licencia de actor de voz documentada.
+• Mezcla adaptativa (ducking) que prioriza SFX de alerta en momentos de riesgo — ver sección 11.4 para su
+integración con el HUD.
+
+-- 11 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 12
+11 UI/UX Full Responsive — Nivel de Pulido AAA
+11.1 · Principios de Responsividad (vigentes, reforzados)
+• Safe Area First en el 100% de la UI interactiva — notch, cámara perforada, barra de gestos.
+• Canvas Scaler en modo Scale With Screen Size, match dinámico según aspect ratio.
+• Anchors relativos exclusivamente — cero posiciones absolutas en píxeles.
+• Validado desde 360×780 hasta tablets 1280×800, en al menos 4 perfiles de dispositivo (ver GDD v2.0
+mega-prompt §10).
+• Botones táctiles con área mínima 48×48dp; tipografía TextMeshPro con auto-size.
+11.2 · Micro-interacciones obligatorias (estándar AAA-mobile)
+• Todo botón responde con una micro-animación de escala (0.95x al presionar, retorno con easing) — nunca un
+botón "muerto" visualmente.
+• Transiciones entre pantallas con fade + slide sutil (0.25–0.35s), nunca cortes abruptos.
+• Contadores numéricos (puntaje, monedas) que incrementan con animación de conteo rápido, no salto
+instantáneo de número.
+• Estados de carga con skeleton screens o spinner de marca (nunca pantalla en blanco) mientras Addressables
+carga contenido.
+• Notificaciones de logro/desbloqueo con toast animado desde el borde superior, con ícono y SFX propio.
+11.3 · Pantallas Principales (set completo)
+Pantalla Función clave Detalle de pulido AAA
+Splash / Loading Logo animado, progreso real Tip cultural rotativo + barra con gradiente de marca animado
+Menú Principal Jugar, Tienda, Personajes, Misiones, Clasificación, Ajustes	Personaje visible en preview 3D con idle animado de fondo
+HUD de Partida Puntaje, racha, papeletas, pausa Contador animado, indicador de near-miss, vignette sutil en peligro
+Pantalla de Muerte Resumen + Revivir + Jugar de nuevo Precedida de death-cam (sección 4), resumen con conteo animado de
+Tienda Personajes/Skins/Vehículos/Pase Preview 3D rotable del ítem antes de comprar
+Ajustes Audio, controles, idioma, cuenta, privacidad, háptica	Sliders con feedback en vivo (SFX de prueba al mover volumen)
+11.4 · Accesibilidad y Comodidad
+• Modo de alto contraste opcional para HUD en jugadores con baja visión.
+• Opción de reducir screen shake y efectos de cámara para jugadores sensibles al movimiento.
+• Soporte de daltonismo: los colores de peligro (rojo) siempre acompañados de forma/ícono, nunca solo color.
+
+-- 12 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 13
+12 Arquitectura Técnica — Unity 6 + C#
+La arquitectura definida en el GDD v2.0 (Clean Architecture + MVC/MVVM, Addressables, EventBus,
+SaveService, object pooling) se mantiene como base correcta y se refuerza con los siguientes añadidos de esta
+versión:
+• AnimationService nuevo (Assets/_Project/Scripts/Characters/AnimationService.cs) — capa única que traduce
+eventos de gameplay (colisión, recolección, near-miss) a triggers de Animator, para que ningún script de
+gameplay llame directamente al Animator.
+• FeedbackService nuevo (Assets/_Project/Scripts/Services/) — centraliza screen shake, háptica y partículas
+de "juice", consumido vía EventBus, nunca invocado directo desde lógica de colisión.
+• SecurityService nuevo (ver sección 13) — validación de integridad local, ofuscación de valores de economía
+en memoria, y puente hacia validación server-side.
+Capa Tecnología
+Motor Unity 6 LTS
+Lenguaje C# (.NET estándar de Unity)
+Arquitectura Clean Architecture + MVC/MVVM
+Assets Addressables
+Input Unity Input System
+Backend de servicios Firebase (Auth, Analytics, Remote Config, Crashlytics)
+Backend propio (recomendado) ASP.NET Core — validación server-side de economía y leaderboard anti-cheat
+Guardado en la nube Firebase Firestore + respaldo local cifrado
+13 Seguridad y Auditoría — ISO 27001 / OWASP
+MASVS
+Sección nueva de esta versión. Cruza RD adopta como marco de referencia los controles de la norma ISO/IEC
+27001 (gestión de seguridad de la información) adaptados a un producto de juego móvil, junto con el estándar
+OWASP MASVS (Mobile Application Security Verification Standard) para la seguridad específica de apps
+móviles. No se declara "certificación ISO" — se declara adopción de sus buenas prácticas de control como
+estándar interno de calidad y auditoría.
+13.1 · Checklist de Seguridad de la Aplicación (OWASP MASVS)
+• Almacenamiento seguro: ningún dato sensible (tokens, identificadores de sesión) en texto plano en
+PlayerPrefs; uso de almacenamiento cifrado local.
+• Comunicación segura: 100% de las llamadas a backend propio y Firebase sobre HTTPS/TLS 1.2+, certificate
+pinning en builds de producción.
+
+-- 13 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 14
+• Autenticación robusta: tokens de sesión con expiración, renovación segura, y revocación posible desde el
+backend.
+• Anti-tampering básico: verificación de integridad del build (detección de builds modificados/rooteados) antes
+de sincronizar economía en la nube.
+• Ofuscación de código: ofuscación de ensamblados C# en builds de release (ej. vía IL2CPP + configuración
+de symbols) para dificultar ingeniería inversa de la lógica de economía.
+• Gestión de secretos: ninguna API key sensible embebida directamente en código cliente sin restricción de
+dominio/paquete — todas las keys de Firebase restringidas por SHA-1/bundle ID.
+13.2 · Anti-Cheat y Validación de Economía (crítico)
+• Ninguna recompensa de moneda se otorga confiando solo en el cliente — el backend (ASP.NET Core) valida
+rangos plausibles de puntaje/distancia antes de acreditar papeletas o trofeos.
+• Leaderboard con validación server-side: puntajes fuera de rango estadísticamente posible (ej. distancia
+recorrida en tiempo imposible) se marcan para revisión antes de publicarse.
+• Rate limiting en endpoints de economía y leaderboard para prevenir spam/bot de solicitudes.
+• Auditoría de logs de transacciones de IAP con reconciliación periódica contra los recibos de Google Play / App
+Store.
+13.3 · Protección de Datos del Jugador (privacidad por diseño)
+• Recolección de datos mínima necesaria (principio de minimización de datos, alineado a buenas prácticas de
+ISO 27001 e inspirado en GDPR/COPPA donde aplique).
+• Política de privacidad clara y accesible desde Ajustes, explicando exactamente qué recolecta Firebase
+Analytics/Crashlytics.
+• Opción de cuenta de invitado sin datos personales, con posibilidad de vincular cuenta más adelante de forma
+explícita y consentida.
+• Eliminación de cuenta y datos asociados disponible para el jugador, con proceso documentado.
+13.4 · Plan de Auditoría de Seguridad (checklist previo a cada release)
+Control Frecuencia Responsable de verificación
+Escaneo de dependencias/SDKs por vulnerabilidades conocidas	Cada release Equipo técnico
+Revisión de permisos de la app (Android/iOS) Cada release Equipo técnico
+Prueba de manipulación de economía en cliente (memory editing)	Cada release mayor QA / Seguridad
+Verificación de certificate pinning y TLS Cada release Equipo técnico
+Revisión de política de privacidad vs. datos realmente recolectados	Cada release mayor Producto / Legal
+Prueba de rate limiting en endpoints críticos Cada release mayor Backend
+
+-- 14 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 15
+14 Módulos del Sistema (detallado)
+Módulo Responsabilidad Notas técnicas clave
+Inicio / Bootstrap Carga inicial, splash, precarga Addressables Progreso real, nunca simulado
+Autenticación Login invitado / Google Play Games / Game Center	Firebase Auth + SecurityService
+Gameplay Core Movimiento, colisiones, spawn, dificultad Object pooling + AnimationService + FeedbackService
+Animación / Game Feel Estados de Animator, juice, screen shake, háptica	Ver sección 05 — set completo obligatorio
+Personajes / Skins Selección, equipamiento, preview 3D Addressables; cero personaje sin set de animación
+Tienda Compra con soft/hard currency, IAP Validación server-side obligatoria (sección 13.2)
+Economía Balance de monedas, anti-cheat SecurityService + backend ASP.NET Core
+Misiones y Logros Objetivos diarios/semanales EventBus desacoplado
+Clasificación mundial Leaderboard global/regional Anti-cheat server-side (sección 13.2)
+Audio Música adaptativa, mezcla dinámica 4 buses: Música/SFX/Ambiente/Voz
+Guardado en la nube Backup multi-dispositivo Cifrado local + Firestore
+Publicidad opcional Rewarded/interstitial no intrusivos Frecuencia limitada, nunca forzada
+Pase de temporada Progresión dual gratuita/premium Remote Config
+Seguridad Anti-tampering, cifrado, auditoría Ver sección 13 completa
+15 Monetización Ética
+• Cero pay-to-win — solo cosméticos y conveniencia.
+• Rewarded ads opcionales (revivir, doblar recompensa), siempre con opción de rechazo visible.
+• Interstitials espaciados (máx. 1 cada 3–4 partidas), nunca en medio de una acción del jugador.
+• Pase de temporada de doble vía (gratuita + premium), ambas con contenido real.
+• Transparencia de precios y validación server-side de toda transacción (sección 13.2).
+16 Cumplimiento, Legal e Imagen
+• Clasificación todo público (PEGI 3 / ESRB Everyone).
+• Cumplimiento de Google Play Families / Apple Kids Category si aplica.
+• Política de privacidad conforme a buenas prácticas de protección de datos (sección 13.3).
+• Ninguna figura pública real sin licencia firmada de imagen, voz y marca.
+• Bandera dominicana con proporciones y colores oficiales, sin alteraciones irrespetuosas.
+• Marcas de terceros (ej. "OMSA") revisadas legalmente o genericadas antes del lanzamiento.
+
+-- 15 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 16
+17 Plan de Ejecución por Fases — Actualizado
+Dado el diagnóstico de la sección 01, el plan de fases se actualiza: la Fase 1 debe reejecutarse correctamente
+(geometría 3D real, no formas planas) antes de reconocer avance hacia fases posteriores, aunque ya se haya
+reportado trabajo previo en ellas.
+Fase Entregable principal Foco de calidad reforzado v3.0
+1 · Prototipo (REINICIO) Prototipo jugable con geometría 3D real (cápsulas/cubos con volumen, nunca sprites planos)	Verificación visual obligatoria contra este documento antes de av
+2 · Arte 3D Low-Poly Personajes, props y biomas integrados Presupuesto de polígonos + draw calls verificados en Profiler
+3 · Mecánicas + Animación Movimiento, colisiones, HUD, set completo de animación (sección 05)	Cero estado de Animator faltante; game feel validado por playtes
+4 · IA y Obstáculos Patrones de tráfico, dificultad dinámica Curva validada con playtesting real, Remote Config conectado
+5 · Seguridad y MonetizaciónSecurityService, validación server-side, tienda, IAP, ads	Checklist de auditoría de la sección 13.4 en verde
+6 · Beta Cerrada Build firmado en Internal Testing / TestFlight Crash-free ≥99%, feedback cultural positivo
+7 · Lanzamiento Publicación pública Android e iOS Checklist de store compliance + seguridad 100% verificado
+18 QA, Testing, Rendimiento y Auditoría de
+Calidad
+• Pruebas unitarias sobre economía, progresión y guardado (cobertura objetivo >80% en lógica crítica).
+• Pruebas de integración de compras (sandbox Google Play / App Store) antes de cada release.
+• Testing de rendimiento en matriz de dispositivos gama baja/media/alta, Android e iOS.
+• Testing de responsividad en mínimo 6 resoluciones/aspect ratios, incluyendo tablets.
+• Playtesting ciego con usuarios dominicanos reales — autenticidad cultural y curva de dificultad.
+• Nuevo: auditoría de seguridad previa a release siguiendo el checklist de la sección 13.4, sin excepciones.
+• Nuevo: revisión de game feel — ningún estado de animación puede quedar en "pop" visual o transición brusca
+sin corregir.
+• Cero warnings en consola de Unity y cero errores de build antes de cualquier submisión a tienda.
+
+-- 16 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 17
+19 Distribución — Google Play y App Store
+• Android App Bundle (.aab) firmado, target API level vigente.
+• Google Play Data Safety form y política de anuncios cumplidos, reflejando exactamente lo auditado en sección
+13.3.
+• iOS con App Transport Security y App Tracking Transparency correctamente configurados.
+• Metadatos localizados (ES/EN), capturas reales de gameplay, video de 15–30s del core loop.
+• ASO con palabras clave: "juego dominicano", "cruza la calle", "RD game", "juego arcade RD".
+• Solicitud de reseña únicamente tras un "momento de victoria" del jugador.
+20 Riesgos y Mitigación
+Riesgo Impacto Mitigación
+Proyecto sigue en estado de placeholder plano	Crítico — bloquea todo Reinicio disciplinado de Fase 1 según sección 17, sin excepciones
+Uso no autorizado de imagen de figuras públicas	Alto — legal Personajes originales; revisión legal previa a cualquier excepción
+Manipulación de economía/leaderboard (cheating)	Alto — reputación/negocioValidación server-side obligatoria (sección 13.2)
+Filtración o uso indebido de datos del jugador	Alto — legal/reputación Controles de la sección 13.3, minimización de datos
+Bajo rendimiento en gama baja Alto — retención Presupuesto de polígonos, object pooling, LOD, testing continuo
+Animación pobre / game feel plano Alto — percepción de calidad	Set de animación obligatorio sección 05, checklist QA sección 18
+21 Métricas de Éxito (KPIs)
+Métrica Objetivo de referencia
+Retención D1 ≥ 35%
+Retención D7 ≥ 12%
+Duración media de sesión 3–6 minutos
+Sesiones por día por usuario activo ≥ 3
+Crash-free sessions ≥ 99.5%
+FPS estable en dispositivo de referencia gama media 60 FPS constante
+Calificación promedio en tiendas ≥ 4.4 / 5
+Incidentes de seguridad críticos post-lanzamiento 0 (objetivo absoluto)
+22 Roadmap Post-Lanzamiento
+
+-- 17 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 18
+• Mes 1–2: corrección reactiva de bugs, ajuste de economía y dificultad según datos reales.
+• Mes 3: primer evento de temporada mayor (Carnaval o Independencia) con bioma y skins exclusivas.
+• Mes 4–6: nuevo bioma permanente, sistema de clanes/equipos regionales, torneos semanales.
+• Mes 6+: modo multijugador asíncrono y expansión a mercados de la diáspora dominicana.
+• Continuo: auditoría de seguridad recurrente según el plan de la sección 13.4, en cada release mayor.
+
+-- 18 of 19 --
+
+CRUZA RD — v3.0 Documento de Ejecución y Auditoría — Confidencial
+Cruza RD — Documento de Ejecución v3.0 Página 19
+23 Apéndice — Mega-Prompt Maestro para
+Cursor y Agentes IA
+Versión actualizada del mega-prompt para pegar directamente en Cursor. Reemplaza la versión anterior e
+incorpora el diagnóstico y los estándares nuevos de este documento (benchmark, animación, seguridad, UX
+AAA).
+ROL: Eres el ingeniero técnico principal de Cruza RD, endless-crosser 3D en Unity 6 (C#), con estándar de
+calidad AAA-mobile (nivel Subway Surfers / Temple Run / Crossy Road).
+DIAGNÓSTICO DE PARTIDA (obligatorio leer primero): la build actual puede estar en estado de placeholder
+plano sin geometría 3D real, animación ni HUD funcional. Antes de aceptar cualquier tarea nueva, verifica
+el estado real del proyecto contra este documento — si no cumple el mínimo de Fase 1 (geometría 3D real,
+no sprites planos), esa es la tarea prioritaria, no features nuevas.
+CONTEXTO OBLIGATORIO:
+- Arquitectura: Clean Architecture + MVC/MVVM. AnimationService y FeedbackService como capas obligatorias
+entre gameplay y presentación — ningún script de gameplay llama directo al Animator ni dispara screen
+shake.
+- Todo elemento generado en el loop de gameplay usa object pooling, sin excepción.
+- Persistencia solo vía SaveService; economía nunca se acredita solo desde el cliente — validación
+server-side obligatoria (ver sección 13.2).
+- Seguridad por defecto: sin datos sensibles en texto plano, HTTPS/TLS en toda comunicación, ofuscación en
+builds de release (ver sección 13 completa).
+- Full responsive obligatorio: Canvas Scaler Scale With Screen Size, anchors relativos 100%, validado en
+aspect ratios desde 360×780 hasta tablets 1280×800, con Safe Area estricta.
+- Rendimiento objetivo: 60 FPS piso (no meta) en gama media, presupuesto de polígonos respetado, <60 draw
+calls por escena.
+- Toda animación de personaje debe cubrir el set mínimo de la sección 5.1 antes de considerarse terminada:
+idle, run, lane switch, jump/dodge, near-miss, collect (normal y power-up), death, victoria.
+- Extend-never-overwrite: extiende módulos existentes, nunca reescribas sin justificación documentada.
+- Ningún personaje ni asset representa a una figura pública real sin licencia documentada.
+TAREA A EJECUTAR: [describe aquí la tarea específica]
+FORMATO DE ENTREGA ESPERADO:
+1. Plan breve de archivos a crear/modificar (ruta exacta).
+2. Código C# completo, production-grade, comentado donde no sea obvio.
+3. Verificación exacta de funcionamiento (pasos en el Editor o comando de test).
+4. Confirmación de que no rompe FPS objetivo, responsividad, ni introduce riesgo de seguridad.
+5. Confirmación de que el game feel (animación/feedback) cumple el estándar de la sección 05, si aplica.
+6. Siguiente paso concreto sugerido dentro del plan de fases actualizado (sección 17).
+Nota de cierre: este documento v3.0 es ahora la única fuente de verdad del proyecto y sustituye a la versión 2.0
+en todo punto donde haya diferencia. Cruza RD se construye sin atajos, con el mismo nivel de disciplina técnica,
+cultural y de seguridad que un estudio de clase mundial — cada fase se verifica con evidencia real antes de
+darse por cerrada. Vamos con todo, sin excepciones.
+
+-- 19 of 19 --
+

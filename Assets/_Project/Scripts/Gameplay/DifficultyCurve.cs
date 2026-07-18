@@ -49,7 +49,8 @@ namespace CruzaRD.Gameplay
 
         public float GetDangerousLaneChance(int distanceMeters)
         {
-            return Mathf.Clamp01(_baseDangerousLaneChance + distanceMeters * _dangerGrowthPerMeter);
+            var chance = _baseDangerousLaneChance + distanceMeters * _dangerGrowthPerMeter;
+            return Mathf.Clamp(chance, 0f, _maxDangerousLaneChance);
         }
 
         /// <summary>Remote Config / live-ops override without new build.</summary>

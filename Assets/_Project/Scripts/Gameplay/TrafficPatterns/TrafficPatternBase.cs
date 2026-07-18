@@ -13,7 +13,7 @@ namespace CruzaRD.Gameplay.TrafficPatterns
 
         public virtual void Configure(float speed, Vector3 direction)
         {
-            Speed = speed * PowerUpTrigger.Evaluate();
+            Speed = speed * CruzaRD.Gameplay.TrafficSlowdown.Evaluate();
             Direction = direction.normalized;
         }
 

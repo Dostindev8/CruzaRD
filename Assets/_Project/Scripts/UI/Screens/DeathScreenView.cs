@@ -1,7 +1,9 @@
 // Purpose: Game-over summary — Revive (rewarded ad placeholder) + Play Again.
+// v3: resumen con conteo animado de recompensas (GDD v3 §11.3), precedido por death-cam.
 
 using CruzaRD.Core;
 using CruzaRD.Services;
+using CruzaRD.UI.Components;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -51,7 +53,17 @@ namespace CruzaRD.UI.Screens
         {
             SetVisible(true);
             if (_titleText != null) _titleText.text = "¡QUÍTATE DEL MEDIO!";
-            if (_scoreText != null) _scoreText.text = $"Puntaje: {e.Score:N0}";
+
+            // Conteo animado del puntaje final — nunca salto instantáneo (GDD v3 §11.2)
+            if (_scoreText != null)
+            {
+                var counter = _scoreText.GetComponent<AnimatedCounter>()
+                              ?? _scoreText.gameObject.AddComponent<AnimatedCounter>();
+                counter.Bind(_scoreText, "N0", " pts");
+                counter.SetImmediate(0);
+                counter.SetValue(e.Score);
+            }
+
             if (_distanceText != null) _distanceText.text = $"Distancia: {e.DistanceMeters} m";
 
             if (ServiceLocator.TryGet<ISaveService>(out var save))

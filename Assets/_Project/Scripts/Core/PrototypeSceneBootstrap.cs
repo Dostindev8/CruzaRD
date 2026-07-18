@@ -61,6 +61,10 @@ namespace CruzaRD.Core
             player.AddComponent<PlayerCollisionHandler>();
             player.AddComponent<PlayerCharacterController>();
 
+            // v3: capa de animación (gameplay nunca toca el Animator) + detector de near-miss
+            player.AddComponent<AnimationService>();
+            NearMissDetector.AttachTo(player);
+
             // Camera
             Camera cam;
             if (Camera.main != null)

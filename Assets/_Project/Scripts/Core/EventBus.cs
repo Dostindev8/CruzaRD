@@ -143,4 +143,38 @@ namespace CruzaRD.Core
         public readonly bool Success;
         public ReviveCompletedEvent(bool success) => Success = success;
     }
+
+    // ── Game feel / v3.0 (GDD v3 §4–§5) ────────────────────────────────────
+    /// <summary>Player dodged a vehicle by a very small margin — bonus + juice.</summary>
+    public readonly struct NearMissEvent
+    {
+        public readonly float MarginMeters;
+        public NearMissEvent(float marginMeters) => MarginMeters = marginMeters;
+    }
+
+    /// <summary>Fired at the exact impact frame, before GameOverEvent (death-cam window).</summary>
+    public readonly struct PlayerImpactEvent
+    {
+        public readonly UnityEngine.Vector3 ImpactPosition;
+        public PlayerImpactEvent(UnityEngine.Vector3 position) => ImpactPosition = position;
+    }
+
+    /// <summary>Player started/finished a lane move — AnimationService listens.</summary>
+    public readonly struct PlayerMoveEvent
+    {
+        public readonly bool Started;
+        public readonly bool IsForward;
+        public PlayerMoveEvent(bool started, bool isForward)
+        {
+            Started = started;
+            IsForward = isForward;
+        }
+    }
+
+    /// <summary>Power-up activated (distinct from normal collect for anim/feedback).</summary>
+    public readonly struct PowerUpActivatedEvent
+    {
+        public readonly string PowerUpId;
+        public PowerUpActivatedEvent(string powerUpId) => PowerUpId = powerUpId;
+    }
 }

@@ -34,6 +34,7 @@ namespace CruzaRD.Gameplay
 
             var id = _type.ToString().ToLowerInvariant();
             EventBus.Publish(new ItemCollectedEvent(id, 1));
+            EventBus.Publish(new PowerUpActivatedEvent(id));
 
             var player = FindFirstObjectByType<GridMovementController>();
             switch (_type)

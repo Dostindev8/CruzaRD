@@ -2,7 +2,6 @@
 
 using CruzaRD.Gameplay;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace CruzaRD.UI.Components
@@ -21,14 +20,14 @@ namespace CruzaRD.UI.Components
         {
             if (_root == null) _root = gameObject;
             _movement = FindFirstObjectByType<GridMovementController>();
-            Wire(_up, MoveDirection.Forward);
-            Wire(_down, MoveDirection.Backward);
-            Wire(_left, MoveDirection.Left);
-            Wire(_right, MoveDirection.Right);
+            Wire(_up, GridMoveDirection.Forward);
+            Wire(_down, GridMoveDirection.Backward);
+            Wire(_left, GridMoveDirection.Left);
+            Wire(_right, GridMoveDirection.Right);
             SetEnabled(false);
         }
 
-        private void Wire(Button btn, MoveDirection dir)
+        private void Wire(Button btn, GridMoveDirection dir)
         {
             if (btn == null) return;
             btn.onClick.AddListener(() =>
@@ -38,7 +37,6 @@ namespace CruzaRD.UI.Components
                 _movement?.RequestMove(dir);
             });
 
-            // Ensure accessible hit area
             var rt = btn.GetComponent<RectTransform>();
             if (rt != null)
             {
@@ -61,10 +59,10 @@ namespace CruzaRD.UI.Components
             _down = down;
             _left = left;
             _right = right;
-            Wire(_up, MoveDirection.Forward);
-            Wire(_down, MoveDirection.Backward);
-            Wire(_left, MoveDirection.Left);
-            Wire(_right, MoveDirection.Right);
+            Wire(_up, GridMoveDirection.Forward);
+            Wire(_down, GridMoveDirection.Backward);
+            Wire(_left, GridMoveDirection.Left);
+            Wire(_right, GridMoveDirection.Right);
         }
     }
 }

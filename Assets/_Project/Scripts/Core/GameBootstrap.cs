@@ -29,6 +29,11 @@ namespace CruzaRD.Core
 
             DeviceQualityBenchmark.ApplyRecommendedQuality();
 
+            // SecurityService v3 (GDD v3 §13): registrado ANTES que economía —
+            // toda acreditación de recompensas pasa por su validación de rangos.
+            var security = new SecurityService();
+            ServiceLocator.Register<ISecurityService>(security);
+
             var economy = new EconomyService(save);
             ServiceLocator.Register<IEconomyService>(economy);
 
@@ -56,6 +61,13 @@ namespace CruzaRD.Core
 
             if (FindFirstObjectByType<RunRewardsListener>() == null)
                 gameObject.AddComponent<RunRewardsListener>();
+
+            // FeedbackService v3 (GDD v3 §5.2/§12): juice centralizado vía EventBus
+            if (FeedbackService.Instance == null)
+            {
+                var feedbackGo = new GameObject("FeedbackService");
+                feedbackGo.AddComponent<FeedbackService>();
+            }
         }
     }
 }

@@ -161,24 +161,19 @@ namespace CruzaRD.UI
             var amb = CreateSlider("Amb", root.transform, "Ambiente", 0.58f);
             var voice = CreateSlider("Voice", root.transform, "Voz", 0.48f);
 
-            var dpadGo = CreateUiObject("DpadToggleRow", root.transform);
-            Place(dpadGo.GetComponent<RectTransform>(), 0.5f, 0.38f, 0.8f, 0.06f);
-            var dpadLabel = CreateTmp("DpadLabel", dpadGo.transform, "D-pad en pantalla", 28, TextAlignmentOptions.Left);
-            Place(dpadLabel.rectTransform, 0.35f, 0.5f, 0.6f, 1f);
-            var toggleGo = CreateUiObject("Toggle", dpadGo.transform, typeof(Toggle), typeof(Image));
-            Place(toggleGo.GetComponent<RectTransform>(), 0.85f, 0.5f, 0.15f, 1f);
-            var toggle = toggleGo.GetComponent<Toggle>();
-            toggle.targetGraphic = toggleGo.GetComponent<Image>();
-            toggleGo.GetComponent<Image>().color = UITheme.FlagBlue;
+            var toggle = CreateToggleRow(root.transform, "DpadToggleRow", "D-pad en pantalla", 0.40f);
+            // Accesibilidad v3 (GDD v3 §11.4): háptica y reducir movimiento configurables
+            var haptics = CreateToggleRow(root.transform, "HapticsRow", "Vibración (háptica)", 0.335f);
+            var reduceMotion = CreateToggleRow(root.transform, "ReduceMotionRow", "Reducir movimiento", 0.27f);
 
             var privacy = CreateButton("Privacy", root.transform, "Privacidad", UITheme.CaribbeanCyan);
-            Place(privacy.GetComponent<RectTransform>(), 0.5f, 0.26f, 0.7f, 0.07f);
+            Place(privacy.GetComponent<RectTransform>(), 0.5f, 0.19f, 0.7f, 0.06f);
 
             var close = CreateButton("Close", root.transform, "Cerrar", UITheme.FlagRed);
-            Place(close.GetComponent<RectTransform>(), 0.5f, 0.14f, 0.7f, 0.07f);
+            Place(close.GetComponent<RectTransform>(), 0.5f, 0.11f, 0.7f, 0.06f);
 
             var view = root.AddComponent<SettingsView>();
-            view.Bind(root, music, sfx, amb, voice, toggle, close, privacy, null);
+            view.Bind(root, music, sfx, amb, voice, toggle, close, privacy, null, haptics, reduceMotion);
             root.SetActive(false);
         }
 
@@ -276,6 +271,7 @@ namespace CruzaRD.UI
         {
             var go = CreateUiObject(name, parent, typeof(Image), typeof(Button));
             go.GetComponent<Image>().color = color;
+            go.AddComponent<UIButtonJuice>(); // GDD v3 §11.2: ningún botón sin micro-animación
             var btn = go.GetComponent<Button>();
             var colors = btn.colors;
             colors.highlightedColor = Color.Lerp(color, Color.white, 0.15f);
@@ -291,6 +287,22 @@ namespace CruzaRD.UI
             rt.sizeDelta = new Vector2(Mathf.Max(rt.sizeDelta.x, UITheme.MinTouchDp * 2f),
                 Mathf.Max(rt.sizeDelta.y, UITheme.MinTouchDp));
             return btn;
+        }
+
+        private static Toggle CreateToggleRow(Transform parent, string rowName, string label, float yAnchor)
+        {
+            var row = CreateUiObject(rowName, parent);
+            Place(row.GetComponent<RectTransform>(), 0.5f, yAnchor, 0.8f, 0.055f);
+
+            var lbl = CreateTmp(rowName + "Label", row.transform, label, 28, TextAlignmentOptions.Left);
+            Place(lbl.rectTransform, 0.35f, 0.5f, 0.6f, 1f);
+
+            var toggleGo = CreateUiObject("Toggle", row.transform, typeof(Toggle), typeof(Image));
+            Place(toggleGo.GetComponent<RectTransform>(), 0.85f, 0.5f, 0.15f, 1f);
+            var toggle = toggleGo.GetComponent<Toggle>();
+            toggle.targetGraphic = toggleGo.GetComponent<Image>();
+            toggleGo.GetComponent<Image>().color = UITheme.FlagBlue;
+            return toggle;
         }
 
         private static Slider CreateSlider(string name, Transform parent, string label, float yAnchor)

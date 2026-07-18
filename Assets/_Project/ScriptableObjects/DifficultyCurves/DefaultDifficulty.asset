@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f3848c0199b8cf429f894db5c8dd81a, type: 3}
+  m_Name: DefaultDifficulty
+  m_EditorClassIdentifier: 
+  _baseSpeed: 4
+  _speedPerMeter: 0.012
+  _maxSpeed: 14
+  _baseSpawnInterval: 1.4
+  _minSpawnInterval: 0.35
+  _intervalReductionPerMeter: 0.0015
+  _baseDangerousLaneChance: 0.35
+  _maxDangerousLaneChance: 0.85
+  _dangerGrowthPerMeter: 0.0008

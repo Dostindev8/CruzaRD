@@ -18,12 +18,24 @@ namespace CruzaRD.UI.Screens
         [SerializeField] private GameObject _root;
 
         private int _papeletas;
+        private AnimatedCounter _scoreCounter;
 
         private void Awake()
         {
             if (_root == null) _root = gameObject;
             if (_pauseButton != null)
                 _pauseButton.onClick.AddListener(OnPause);
+            EnsureScoreCounter();
+        }
+
+        // Conteo animado del puntaje (GDD v3 §11.2) — nunca salto instantáneo
+        private void EnsureScoreCounter()
+        {
+            if (_scoreCounter != null || _scoreText == null)
+                return;
+
+            _scoreCounter = gameObject.GetComponent<AnimatedCounter>() ?? gameObject.AddComponent<AnimatedCounter>();
+            _scoreCounter.Bind(_scoreText);
         }
 
         private void OnEnable()
@@ -52,13 +64,18 @@ namespace CruzaRD.UI.Screens
             _papeletas = 0;
             SetVisible(true);
             RefreshPapeletas();
+            EnsureScoreCounter();
+            _scoreCounter?.SetImmediate(0);
         }
 
         private void OnGameOver(GameOverEvent _) => SetVisible(false);
 
         private void OnScore(ScoreChangedEvent e)
         {
-            if (_scoreText != null)
+            EnsureScoreCounter();
+            if (_scoreCounter != null)
+                _scoreCounter.SetValue(e.Score);
+            else if (_scoreText != null)
                 _scoreText.text = e.Score.ToString("N0");
         }
 
@@ -111,6 +128,8 @@ namespace CruzaRD.UI.Screens
             _papeletasText = papeletas;
             _pauseButton = pause;
             _root = root;
+            _scoreCounter = null;
+            EnsureScoreCounter();
             if (_pauseButton != null)
             {
                 _pauseButton.onClick.RemoveListener(OnPause);

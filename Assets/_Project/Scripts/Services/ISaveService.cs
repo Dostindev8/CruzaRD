@@ -35,5 +35,10 @@ namespace CruzaRD.Services
         public bool UseOnScreenDpad;
         public string Language = "es";
         public int QualityTier = -1; // -1 = auto
+
+        // Accesibilidad y game feel (GDD v3 §11.4)
+        public bool HapticsEnabled = true;
+        public bool ReduceMotion;
+        public bool HighContrastHud;
     }
 }

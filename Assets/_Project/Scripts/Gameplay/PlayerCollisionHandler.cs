@@ -36,7 +36,8 @@ namespace CruzaRD.Gameplay
                     return;
 
                 GameManager.Instance.BreakCombo();
-                GameManager.Instance.TriggerGameOver();
+                // Death-cam v3: impacto → cámara lenta → GameOver (no corte seco)
+                GameManager.Instance.TriggerImpact(transform.position);
                 return;
             }
 
