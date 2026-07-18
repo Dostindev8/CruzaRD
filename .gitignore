@@ -74,3 +74,6 @@ npm-debug.log*
 ServerData/
 AddressablesBuild/
 Assets/AddressableAssetsData/*/addressables_content_state.bin
+
+# Herramientas temporales del agente (extraccion PDF, logs de compilacion)
+_tools/
