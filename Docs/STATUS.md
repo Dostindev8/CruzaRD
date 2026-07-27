@@ -1,22 +1,32 @@
-# STATUS — Cruza RD (Mundo Real Deploy)
+# STATUS — Cruza RD (Mundo Real · LIVE)
 
-**Fecha:** 2026-07-26 · God-Stack-Ing · PRODUCCIÓN  
-**URL:** https://cruza-rd.vercel.app  
-**Repo:** https://github.com/Dostindev8/CruzaRD
+**Fecha:** 2026-07-26 · God-Stack-Ing  
+**Producción:** https://cruza-rd.vercel.app → **HTTP 200** (404 resuelto)  
+**GitHub:** https://github.com/Dostindev8/CruzaRD (`main` @ d459852)
 
-## Causa del 404 (resuelta)
-GitHub solo tenía `RFADMF.md` (Initial commit). Vercel desplegaba un repo sin `index.html` → **404 NOT_FOUND**.  
-Fix: subir monorepo R3F + `vercel.json` con `outputDirectory: apps/game-client/dist`.
+## Causa raíz del 404
+El repo solo tenía `RFADMF.md`. Vercel no tenía `index.html` → NOT_FOUND.
 
-## Stack
-React 19 + R3F + Vite 6 · offline-first en Vercel (API local opcional)
+## Fix aplicado
+1. Subir monorepo R3F (`apps/`, `Packages/shared-types`, `vercel.json`)
+2. `outputDirectory: apps/game-client/dist`
+3. Workspace case-sensitive: `Packages/shared-types` (Linux)
+4. `.vercelignore` excluye Unity `Library/` (upload slim)
 
-## QA
-- [x] `pnpm build` client PASS
-- [x] Anti-cheat API test PASS
-- [x] Full responsive + orientation lock
-- [x] Splash / Hub / Runner alineados a refs
-- [x] vercel.json + security headers
+## QA producción
+| Check | Resultado |
+|---|---|
+| https://cruza-rd.vercel.app | 200 + HTML del juego |
+| /manifest.webmanifest | 200 |
+| Build Vercel | PASS (shared-types + client) |
+| GitHub main | Force-push juego completo |
 
-## Arranque local
-Ver `README.md` / `Docs/COMO_ACTIVAR.md`
+## Experiencia
+Splash RD · Hub misiones/tabla · Runner 3D OMSA/COLMADO · offline-first · full responsive
+
+## Local
+```powershell
+pnpm install
+pnpm --filter @cruza-rd/api-server dev
+pnpm --filter @cruza-rd/game-client dev
+```
