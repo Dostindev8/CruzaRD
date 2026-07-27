@@ -297,14 +297,34 @@ function LandmarkProps() {
 
 /** Corredor RD: camisa blanca, pantalón azul, gorra bandera, mochila RD */
 function PlayerBody({ skating }: { skating: boolean }) {
+  const group = useRef<THREE.Group>(null);
+  const leftLeg = useRef<THREE.Mesh>(null);
+  const rightLeg = useRef<THREE.Mesh>(null);
+  const leftArm = useRef<THREE.Mesh>(null);
+  const rightArm = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    const swing = skating ? 0.15 : 0.55;
+    const speed = skating ? 14 : 9;
+    const a = Math.sin(t * speed) * swing;
+    if (leftLeg.current) leftLeg.current.rotation.x = a;
+    if (rightLeg.current) rightLeg.current.rotation.x = -a;
+    if (leftArm.current) leftArm.current.rotation.x = -a * 0.9;
+    if (rightArm.current) rightArm.current.rotation.x = a * 0.9;
+    if (group.current) {
+      group.current.position.y = skating ? Math.sin(t * 12) * 0.04 : Math.abs(Math.sin(t * speed)) * 0.03;
+    }
+  });
+
   return (
-    <group>
+    <group ref={group}>
       {/* Legs / pants */}
-      <mesh position={[-0.12, 0.28, 0]}>
+      <mesh ref={leftLeg} position={[-0.12, 0.28, 0]}>
         <capsuleGeometry args={[0.1, 0.32, 4, 8]} />
         <meshStandardMaterial color="#1e3a8a" />
       </mesh>
-      <mesh position={[0.12, 0.28, 0]}>
+      <mesh ref={rightLeg} position={[0.12, 0.28, 0]}>
         <capsuleGeometry args={[0.1, 0.32, 4, 8]} />
         <meshStandardMaterial color="#1e3a8a" />
       </mesh>
@@ -328,14 +348,14 @@ function PlayerBody({ skating }: { skating: boolean }) {
       {/* Torso white */}
       <mesh position={[0, 0.72, 0]}>
         <capsuleGeometry args={[0.26, 0.42, 4, 8]} />
-        <meshStandardMaterial color="#f5f5f5" />
+        <meshStandardMaterial color="#f5f5f5" roughness={0.55} metalness={0.05} />
       </mesh>
       {/* Arms */}
-      <mesh position={[-0.38, 0.7, 0]} rotation={[0, 0, 0.35]}>
+      <mesh ref={leftArm} position={[-0.38, 0.7, 0]} rotation={[0, 0, 0.35]}>
         <capsuleGeometry args={[0.08, 0.28, 4, 6]} />
         <meshStandardMaterial color="#f0c7a0" />
       </mesh>
-      <mesh position={[0.38, 0.7, 0]} rotation={[0, 0, -0.35]}>
+      <mesh ref={rightArm} position={[0.38, 0.7, 0]} rotation={[0, 0, -0.35]}>
         <capsuleGeometry args={[0.08, 0.28, 4, 6]} />
         <meshStandardMaterial color="#f0c7a0" />
       </mesh>
@@ -406,6 +426,14 @@ function EntityMesh({ entity, playerZ }: { entity: WorldEntity; playerZ: number 
     );
   }
 
+  if (entity.kind === 'politician') {
+    return (
+      <group position={[x, 0, z]}>
+        <PoliticianMesh label={entity.label ?? 'NPC'} color={entity.color ?? '#333'} />
+      </group>
+    );
+  }
+
   const h =
     entity.kind === 'barrier_low' ? 0.7 : entity.kind === 'gap' ? 0.2 : entity.kind === 'container' ? 1.7 : 1.55;
   const w = entity.kind === 'container' ? 1.65 : 1.2;
@@ -434,6 +462,32 @@ function EntityMesh({ entity, playerZ }: { entity: WorldEntity; playerZ: number 
   );
 }
 
+function PoliticianMesh({ label, color }: { label: string; color: string }) {
+  return (
+    <group>
+      <mesh position={[0, 0.95, 0]}>
+        <capsuleGeometry args={[0.32, 0.7, 4, 8]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      <mesh position={[0, 1.7, 0]}>
+        <sphereGeometry args={[0.28, 12, 12]} />
+        <meshStandardMaterial color="#f0c7a0" />
+      </mesh>
+      <mesh position={[0, 1.95, 0]}>
+        <cylinderGeometry args={[0.3, 0.3, 0.12, 12]} />
+        <meshStandardMaterial color="#111" />
+      </mesh>
+      <Text position={[0, 2.35, 0.2]} fontSize={0.22} color="#fff" anchorX="center" outlineWidth={0.02} outlineColor="#000">
+        {label}
+      </Text>
+      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.45, 16]} />
+        <meshStandardMaterial color="#000" transparent opacity={0.25} />
+      </mesh>
+    </group>
+  );
+}
+
 function CollectibleMesh({ kind }: { kind: WorldEntity['kind'] }) {
   if (kind === 'banana') {
     return (
@@ -447,7 +501,13 @@ function CollectibleMesh({ kind }: { kind: WorldEntity['kind'] }) {
     return (
       <mesh rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.28, 0.28, 0.06, 16]} />
-        <meshStandardMaterial color={tokens.coinGold} metalness={0.7} roughness={0.25} emissive="#aa8800" emissiveIntensity={0.15} />
+        <meshStandardMaterial
+          color={tokens.coinGold}
+          metalness={0.7}
+          roughness={0.25}
+          emissive="#aa8800"
+          emissiveIntensity={0.15}
+        />
       </mesh>
     );
   }
@@ -479,14 +539,6 @@ function CollectibleMesh({ kind }: { kind: WorldEntity['kind'] }) {
           <sphereGeometry args={[0.18, 10, 10]} />
           <meshStandardMaterial color="#c4a35a" />
         </mesh>
-        <mesh position={[0.12, 0.1, 0.05]}>
-          <boxGeometry args={[0.12, 0.05, 0.18]} />
-          <meshStandardMaterial color="#c1272d" />
-        </mesh>
-        <mesh position={[-0.1, 0.12, -0.05]}>
-          <sphereGeometry args={[0.07, 8, 8]} />
-          <meshStandardMaterial color="#f5d76e" />
-        </mesh>
       </group>
     );
   }
@@ -496,6 +548,32 @@ function CollectibleMesh({ kind }: { kind: WorldEntity['kind'] }) {
         <boxGeometry args={[0.55, 0.1, 0.18]} />
         <meshStandardMaterial color="#ff7a18" emissive="#ff5500" emissiveIntensity={0.35} />
       </mesh>
+    );
+  }
+  if (kind === 'street_clothes') {
+    return (
+      <group>
+        <mesh>
+          <boxGeometry args={[0.5, 0.35, 0.35]} />
+          <meshStandardMaterial color="#1D63C7" />
+        </mesh>
+        <Text position={[0, 0.35, 0]} fontSize={0.14} color="#fff" anchorX="center">
+          ROPA
+        </Text>
+      </group>
+    );
+  }
+  if (kind === 'street_weapon') {
+    return (
+      <group>
+        <mesh rotation={[0, 0, 0.3]}>
+          <boxGeometry args={[0.12, 0.7, 0.12]} />
+          <meshStandardMaterial color="#8B5A2B" />
+        </mesh>
+        <Text position={[0, 0.5, 0]} fontSize={0.12} color="#FFE07A" anchorX="center">
+          ARMA
+        </Text>
+      </group>
     );
   }
   return (

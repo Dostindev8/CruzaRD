@@ -1,41 +1,76 @@
 import { useMemo, useState } from 'react';
-import type { ShopItem } from '@cruza-rd/shared-types';
+import type { ShopCategory, ShopItem } from '@cruza-rd/shared-types';
+import { FULL_SHOP_CATALOG } from '../data/catalog';
 import { useI18n } from '../i18n';
 import { api } from '../services/api';
 import { useAppStore } from '../state/appStore';
 import { CurrencyBadge } from '../ui/CurrencyBadge';
 import { GameButton } from '../ui/GameButton';
 import { HudPanel } from '../ui/HudPanel';
-import { IconCoin, IconChicken } from '../ui/IconLibrary';
+import { IconChicken, IconCoin, shopIcon } from '../ui/IconLibrary';
 
-type Tab = 'character' | 'backpack' | 'skateboard' | 'coins' | 'offer';
+const TABS: { key: ShopCategory; labelKey: string }[] = [
+  { key: 'character', labelKey: 'characters' },
+  { key: 'backpack', labelKey: 'backpacks' },
+  { key: 'skateboard', labelKey: 'skateboards' },
+  { key: 'clothes', labelKey: 'clothes' },
+  { key: 'weapon', labelKey: 'weapons' },
+  { key: 'coins', labelKey: 'coins' },
+  { key: 'offer', labelKey: 'offers' },
+];
 
 export function ShopScreen() {
   const t = useI18n();
   const { shopItems, player, setPlayer, setScreen, showToast } = useAppStore();
-  const [tab, setTab] = useState<Tab>('character');
+  const [tab, setTab] = useState<ShopCategory>('character');
   const [busy, setBusy] = useState<string | null>(null);
 
-  const items = useMemo(
-    () => shopItems.filter((i) => i.category === tab),
-    [shopItems, tab],
-  );
+  const catalog = shopItems.length > 0 ? shopItems : FULL_SHOP_CATALOG;
+  const items = useMemo(() => catalog.filter((i) => i.category === tab), [catalog, tab]);
 
   const purchaseSoft = async (item: ShopItem) => {
     if (busy) return;
     setBusy(item.id);
     try {
       if (item.priceCoins != null) {
-        const res = await api.purchase(item.id);
-        setPlayer(res.player);
-        showToast(t.buy);
+        try {
+          const res = await api.purchase(item.id);
+          setPlayer(res.player);
+          showToast(`${t.buy}: ${item.name}`);
+        } catch {
+          // Offline purchase
+          if (!player) return;
+          if (player.ownedSkins.includes(item.id)) {
+            showToast('Ya lo tienes');
+            return;
+          }
+          const price = item.priceCoins ?? 0;
+          if (player.coins < price) {
+            showToast('Monedas insuficientes');
+            return;
+          }
+          const owned = [...new Set([...player.ownedSkins, item.id])];
+          const equipped = { ...player.equippedSkins };
+          if (item.category === 'character') equipped.character = item.id;
+          if (item.category === 'backpack') equipped.backpack = item.id;
+          if (item.category === 'skateboard') equipped.skateboard = item.id;
+          if (item.category === 'clothes') equipped.clothes = item.id;
+          if (item.category === 'weapon') equipped.weapon = item.id;
+          setPlayer({ ...player, coins: player.coins - price, ownedSkins: owned, equippedSkins: equipped });
+          showToast(`${t.buy}: ${item.name}`);
+        }
       } else if (item.iapProductId) {
-        await new Promise((r) => window.setTimeout(r, 600));
+        await new Promise((r) => window.setTimeout(r, 500));
         if (player) {
           const next = { ...player };
-          if (item.iapProductId === 'coins_100') next.coins += 100;
-          else if (item.iapProductId === 'coins_500') next.coins += 500;
-          else if (item.iapProductId === 'remove_ads') next.adsRemoved = true;
+          if (item.iapProductId.includes('coins_1000')) next.coins += 1000;
+          else if (item.iapProductId.includes('coins_5000')) next.coins += 5000;
+          else if (item.iapProductId.includes('coins_12000')) next.coins += 12000;
+          else if (item.iapProductId.includes('remove_ads')) next.adsRemoved = true;
+          else if (item.iapProductId.includes('starter')) {
+            next.coins += 2000;
+            next.skateboardCharges = Math.min(8, next.skateboardCharges + 5);
+          }
           setPlayer(next);
         }
         showToast(item.name);
@@ -47,23 +82,26 @@ export function ShopScreen() {
     }
   };
 
+  const labelFor = (key: string) => {
+    const map: Record<string, string> = {
+      characters: t.characters,
+      backpacks: t.backpacks,
+      skateboards: t.skateboards,
+      clothes: t.clothes,
+      weapons: t.weapons,
+      coins: t.coins,
+      offers: t.offers,
+    };
+    return map[key] ?? key;
+  };
+
   return (
     <div className="screen">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
         <GameButton compact variant="navy" style={{ width: 'auto' }} onClick={() => setScreen('home')}>
           ←
         </GameButton>
-        <h1
-          style={{
-            margin: 0,
-            fontFamily: 'var(--font-display)',
-            fontWeight: 800,
-            fontSize: '1.25rem',
-            WebkitTextStroke: '1px #000',
-          }}
-        >
-          {t.shop}
-        </h1>
+        <h1 className="screen-title">{t.shop}</h1>
         <span style={{ flex: 1 }} />
         {player ? (
           <>
@@ -74,72 +112,61 @@ export function ShopScreen() {
       </div>
 
       <div className="tabs" style={{ flexWrap: 'wrap' }}>
-        {(
-          [
-            ['character', t.characters],
-            ['backpack', t.backpacks],
-            ['skateboard', t.skateboards],
-            ['coins', t.coins],
-            ['offer', t.offers],
-          ] as const
-        ).map(([key, label]) => (
+        {TABS.map(({ key, labelKey }) => (
           <button
             key={key}
             type="button"
             className={`tab${tab === key ? ' active' : ''}`}
             onClick={() => setTab(key)}
-            style={{ minWidth: '30%' }}
+            style={{ minWidth: '28%' }}
           >
-            {label}
+            {labelFor(labelKey)}
           </button>
         ))}
       </div>
 
       <div className="shop-grid">
-        {items.length === 0 ? (
-          <HudPanel style={{ gridColumn: '1 / -1' }}>
-            <p style={{ margin: 0, textAlign: 'center', opacity: 0.7 }}>—</p>
-          </HudPanel>
-        ) : (
-          items.map((item) => {
-            const owned = player?.ownedSkins.includes(item.id);
-            const priceLabel =
-              item.priceCoins != null
-                ? `${item.priceCoins} 🪙`
-                : item.iapProductId === 'remove_ads'
-                  ? t.removeAds
-                  : item.iapProductId ?? t.buy;
-            return (
-              <HudPanel key={item.id} compact style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div
-                  style={{
-                    height: 64,
-                    borderRadius: 12,
-                    background: item.previewColor,
-                    border: '2px solid rgba(0,0,0,0.25)',
-                  }}
-                />
-                <strong
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '0.8rem',
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {item.name}
-                </strong>
-                <GameButton
-                  compact
-                  variant={owned ? 'green' : 'blue'}
-                  disabled={!!busy || !!owned}
-                  onClick={() => void purchaseSoft(item)}
-                >
-                  {owned ? t.equipped : priceLabel}
-                </GameButton>
-              </HudPanel>
-            );
-          })
-        )}
+        {items.map((item) => {
+          const owned = player?.ownedSkins.includes(item.id);
+          const priceLabel =
+            item.priceCoins != null
+              ? item.priceCoins === 0
+                ? 'GRATIS'
+                : String(item.priceCoins)
+              : item.iapProductId?.includes('remove')
+                ? t.removeAds
+                : 'IAP';
+          return (
+            <HudPanel key={item.id} compact className="shop-card">
+              <div
+                className="shop-preview"
+                style={{ background: `linear-gradient(145deg, ${item.previewColor}, #0b1f3a)` }}
+              >
+                {shopIcon(item.icon, 40)}
+                {item.rarity ? <span className={`rarity-pill rarity-${item.rarity}`}>{item.rarity}</span> : null}
+              </div>
+              <strong className="shop-name">{item.name}</strong>
+              {item.description ? <p className="shop-desc">{item.description}</p> : null}
+              <GameButton
+                compact
+                variant={owned ? 'green' : 'blue'}
+                disabled={!!busy || (!!owned && item.category !== 'coins' && item.category !== 'offer')}
+                onClick={() => void purchaseSoft(item)}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  {owned && item.category !== 'coins' && item.category !== 'offer' ? (
+                    t.equipped
+                  ) : (
+                    <>
+                      {item.priceCoins != null && item.priceCoins > 0 ? <IconCoin size={14} /> : null}
+                      {priceLabel}
+                    </>
+                  )}
+                </span>
+              </GameButton>
+            </HudPanel>
+          );
+        })}
       </div>
     </div>
   );

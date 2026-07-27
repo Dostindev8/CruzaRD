@@ -21,12 +21,14 @@ export function purchaseShopItem(playerId: string, itemId: string) {
     // free defaults / already owned path
   }
 
-  if (
-    (item.category === 'character' ||
-      item.category === 'backpack' ||
-      item.category === 'skateboard') &&
-    player.ownedSkins.includes(item.id)
-  ) {
+  const equippable =
+    item.category === 'character' ||
+    item.category === 'backpack' ||
+    item.category === 'skateboard' ||
+    item.category === 'clothes' ||
+    item.category === 'weapon';
+
+  if (equippable && player.ownedSkins.includes(item.id)) {
     throw conflict('Item already owned');
   }
 
@@ -39,11 +41,7 @@ export function purchaseShopItem(playerId: string, itemId: string) {
     coins: player.coins - price,
   });
 
-  if (
-    item.category === 'character' ||
-    item.category === 'backpack' ||
-    item.category === 'skateboard'
-  ) {
+  if (equippable) {
     next = {
       ...next,
       ownedSkins: [...new Set([...next.ownedSkins, item.id])],
@@ -52,6 +50,8 @@ export function purchaseShopItem(playerId: string, itemId: string) {
         ...(item.category === 'character' ? { character: item.id } : {}),
         ...(item.category === 'backpack' ? { backpack: item.id } : {}),
         ...(item.category === 'skateboard' ? { skateboard: item.id } : {}),
+        ...(item.category === 'clothes' ? { clothes: item.id } : {}),
+        ...(item.category === 'weapon' ? { weapon: item.id } : {}),
       },
     };
   } else if (item.category === 'coins') {

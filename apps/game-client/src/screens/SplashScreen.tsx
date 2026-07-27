@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n';
-import { LogoWordmark } from '../ui/IconLibrary';
+import {
+  IconChicken,
+  IconCoin,
+  IconFlag,
+  IconTrophy,
+  LogoWordmark,
+} from '../ui/IconLibrary';
 
 interface Props {
   progress: number;
   onDone: () => void;
 }
 
-/** Splash Imagen 3 — logo + tagline + mesa cultural + CTA implícito al cargar */
+/** Splash — logo + tagline + mesa cultural con iconos SVG reales */
 export function SplashScreen({ progress, onDone }: Props) {
   const t = useI18n();
   const [tipIndex, setTipIndex] = useState(0);
@@ -34,19 +40,26 @@ export function SplashScreen({ progress, onDone }: Props) {
   return (
     <div className="screen splash-screen">
       <div className="splash-hero">
-        <div className="splash-logo-wrap">
+        <div className="splash-logo-wrap splash-logo-pulse">
           <LogoWordmark />
         </div>
         <div className="tagline-ribbon">{t.tagline}</div>
+        <p className="splash-sub">Endless runner · República Dominicana</p>
       </div>
 
       <div className="splash-table" aria-hidden>
-        <span className="splash-prop" title="Pesos">💵</span>
-        <span className="splash-prop" title="Pica Pollo">🍗</span>
-        <span className="splash-prop" title="Bocaditos">🥘</span>
-        <span className="splash-prop" title="Mangú">🍽️</span>
-        <span className="splash-prop" title="Café">☕</span>
-        <span className="splash-prop" title="Trofeo">🏆</span>
+        <span className="splash-prop" title="Monedas">
+          <IconCoin size={28} />
+        </span>
+        <span className="splash-prop" title="Pica Pollo">
+          <IconChicken size={28} />
+        </span>
+        <span className="splash-prop" title="Bandera RD">
+          <IconFlag size={28} />
+        </span>
+        <span className="splash-prop" title="Trofeo">
+          <IconTrophy size={28} />
+        </span>
       </div>
 
       <div className="loading-bar-wrap splash-loader">
@@ -58,7 +71,7 @@ export function SplashScreen({ progress, onDone }: Props) {
         </p>
       </div>
 
-      <span className="version-chip">v1.0.0 · Cruza RD</span>
+      <span className="version-chip">v1.1.0 · Cruza RD</span>
     </div>
   );
 }

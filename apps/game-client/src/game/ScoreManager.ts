@@ -38,6 +38,11 @@ export class ScoreManager {
     this.recompute();
   }
 
+  addBonus(points: number) {
+    this.bonusPoints += points;
+    this.recompute();
+  }
+
   resetStreak() {
     this.bananaStreak = 0;
     this.multiplier = 1;

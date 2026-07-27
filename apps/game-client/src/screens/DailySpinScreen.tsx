@@ -4,6 +4,18 @@ import { api } from '../services/api';
 import { useAppStore } from '../state/appStore';
 import { GameButton } from '../ui/GameButton';
 import { HudPanel } from '../ui/HudPanel';
+import { IconSpin } from '../ui/IconLibrary';
+
+const OFFLINE_PRIZES = [
+  { label: '+50 monedas', coins: 50, pica: 0, skate: 0 },
+  { label: '+100 monedas', coins: 100, pica: 0, skate: 0 },
+  { label: '+2 Pica Pollo', coins: 0, pica: 2, skate: 0 },
+  { label: '+1 Patineta', coins: 0, pica: 0, skate: 1 },
+  { label: '+250 monedas', coins: 250, pica: 0, skate: 0 },
+  { label: '+5 Pica Pollo', coins: 0, pica: 5, skate: 0 },
+  { label: '+75 monedas', coins: 75, pica: 0, skate: 0 },
+  { label: '¡Otra vez!', coins: 25, pica: 0, skate: 0 },
+];
 
 export function DailySpinScreen() {
   const t = useI18n();
@@ -11,6 +23,19 @@ export function DailySpinScreen() {
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+
+  const applyOfflinePrize = () => {
+    if (!player) return OFFLINE_PRIZES[0]!.label;
+    const prize = OFFLINE_PRIZES[Math.floor(Math.random() * OFFLINE_PRIZES.length)]!;
+    setPlayer({
+      ...player,
+      coins: player.coins + prize.coins,
+      picaPolloTickets: player.picaPolloTickets + prize.pica,
+      skateboardCharges: Math.min(8, player.skateboardCharges + prize.skate),
+      spinAvailable: false,
+    });
+    return prize.label;
+  };
 
   const spin = async (extra = false) => {
     if (spinning) return;
@@ -28,13 +53,19 @@ export function DailySpinScreen() {
       if (extra) {
         await new Promise((r) => window.setTimeout(r, 800));
       }
-      const res = await api.spin();
-      window.setTimeout(() => {
+      let label = '';
+      try {
+        const res = await api.spin();
         setPlayer(res.player);
-        setResult(res.label);
-        showToast(res.label);
+        label = res.label;
+      } catch {
+        label = applyOfflinePrize();
+      }
+      window.setTimeout(() => {
+        setResult(label);
+        showToast(label);
         setSpinning(false);
-      }, 3500);
+      }, 3200);
     } catch (e) {
       setSpinning(false);
       showToast(e instanceof Error ? e.message : 'Error');
@@ -54,8 +85,12 @@ export function DailySpinScreen() {
             fontWeight: 800,
             fontSize: '1.2rem',
             WebkitTextStroke: '1px #000',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
+          <IconSpin size={24} />
           {t.dailySpin}
         </h1>
       </div>
@@ -76,7 +111,7 @@ export function DailySpinScreen() {
             filter: 'drop-shadow(0 2px 0 #000)',
           }}
         />
-        <div className="spin-wheel" style={{ transform: `rotate(${rotation}deg)` }} />
+        <div className="spin-wheel spin-wheel-glow" style={{ transform: `rotate(${rotation}deg)` }} />
       </div>
 
       {result ? (

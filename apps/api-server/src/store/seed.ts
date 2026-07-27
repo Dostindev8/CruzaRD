@@ -1,4 +1,5 @@
 import type { MissionTemplate, ShopItem } from '@cruza-rd/shared-types';
+import { FULL_SHOP_CATALOG } from '@cruza-rd/shared-types';
 import type { PlayerRecord } from './types.js';
 
 /** ISO week key YYYY-Www for weekly leaderboard buckets. */
@@ -15,15 +16,11 @@ export function localDateKey(date = new Date()): string {
   return date.toISOString().slice(0, 10);
 }
 
-/** Hub (Imagen 2) + HUD in-run (Imagen 1) — Prompt Maestro refs */
 export const SEED_MISSIONS: MissionTemplate[] = [
   {
     id: 'daily_collect_500',
     type: 'collect_coins',
-    title: {
-      'es-DO': 'Recoge 500 monedas',
-      en: 'Collect 500 coins',
-    },
+    title: { 'es-DO': 'Recoge 500 monedas', en: 'Collect 500 coins' },
     target: 500,
     rewardCoins: 100,
     rewardPicaPollo: 0,
@@ -32,10 +29,7 @@ export const SEED_MISSIONS: MissionTemplate[] = [
   {
     id: 'daily_jump_20',
     type: 'jump_count',
-    title: {
-      'es-DO': 'Salta 20 veces',
-      en: 'Jump 20 times',
-    },
+    title: { 'es-DO': 'Salta 20 veces', en: 'Jump 20 times' },
     target: 20,
     rewardCoins: 75,
     rewardPicaPollo: 0,
@@ -44,10 +38,7 @@ export const SEED_MISSIONS: MissionTemplate[] = [
   {
     id: 'daily_skateboard_5',
     type: 'use_powerup',
-    title: {
-      'es-DO': 'Usa patineta 5 veces',
-      en: 'Use skateboard 5 times',
-    },
+    title: { 'es-DO': 'Usa patineta 5 veces', en: 'Use skateboard 5 times' },
     target: 5,
     rewardCoins: 80,
     rewardPicaPollo: 1,
@@ -56,69 +47,33 @@ export const SEED_MISSIONS: MissionTemplate[] = [
   {
     id: 'daily_pica_pollo_100',
     type: 'collect_pica_pollo',
-    title: {
-      'es-DO': 'Recoge Pica Pollo',
-      en: 'Collect Pica Pollo',
-    },
+    title: { 'es-DO': 'Recoge Pica Pollo', en: 'Collect Pica Pollo' },
     target: 100,
     rewardCoins: 150,
     rewardPicaPollo: 5,
     scope: 'daily',
   },
-];
-
-export const SEED_SHOP_ITEMS: ShopItem[] = [
   {
-    id: 'skin_char_default',
-    category: 'character',
-    name: 'Corredor Clásico',
-    priceCoins: 0,
-    previewColor: '#2E7D32',
+    id: 'daily_clothes_10',
+    type: 'collect_clothes',
+    title: { 'es-DO': 'Recoge 10 prendas', en: 'Collect 10 clothes' },
+    target: 10,
+    rewardCoins: 120,
+    rewardPicaPollo: 0,
+    scope: 'daily',
   },
   {
-    id: 'skin_char_merengue',
-    category: 'character',
-    name: 'Merengue',
-    priceCoins: 1500,
-    previewColor: '#C62828',
-  },
-  {
-    id: 'skin_backpack_guagua',
-    category: 'backpack',
-    name: 'Mochila Guagua',
-    priceCoins: 800,
-    previewColor: '#1565C0',
-  },
-  {
-    id: 'skin_skate_republica',
-    category: 'skateboard',
-    name: 'Skate República',
-    priceCoins: 1200,
-    previewColor: '#F9A825',
-  },
-  {
-    id: 'coins_pack_small',
-    category: 'coins',
-    name: '1000 Monedas',
-    iapProductId: 'com.cruzard.coins_1000',
-    previewColor: '#FFD54F',
-  },
-  {
-    id: 'coins_pack_medium',
-    category: 'coins',
-    name: '5000 Monedas',
-    iapProductId: 'com.cruzard.coins_5000',
-    previewColor: '#FFC107',
-  },
-  {
-    id: 'offer_remove_ads',
-    category: 'offer',
-    name: 'Quitar Anuncios',
-    iapProductId: 'com.cruzard.remove_ads',
-    previewColor: '#6A1B9A',
+    id: 'daily_politician_3',
+    type: 'defeat_politician',
+    title: { 'es-DO': 'Limpia 3 vías políticas', en: 'Clear 3 political lanes' },
+    target: 3,
+    rewardCoins: 200,
+    rewardPicaPollo: 2,
+    scope: 'daily',
   },
 ];
 
+export const SEED_SHOP_ITEMS: ShopItem[] = FULL_SHOP_CATALOG;
 /** Known IAP productId → coin grant (stub verify). */
 export const IAP_COIN_GRANTS: Record<string, number> = {
   'com.cruzard.coins_1000': 1000,

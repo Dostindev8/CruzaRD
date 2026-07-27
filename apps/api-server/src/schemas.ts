@@ -21,6 +21,9 @@ export const runPayloadSchema = z.object({
   slidesCount: z.number().int().min(0).max(100_000),
   powerupUsesCount: z.number().int().min(0).max(10_000),
   revivesUsed: z.number().int().min(0).max(50),
+  clothesCollected: z.number().int().min(0).max(10_000).optional(),
+  weaponsCollected: z.number().int().min(0).max(10_000).optional(),
+  politiciansCleared: z.number().int().min(0).max(10_000).optional(),
   clientChecksum: z.string().max(256).optional(),
 });
 

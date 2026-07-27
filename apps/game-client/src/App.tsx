@@ -65,6 +65,9 @@ export default function App() {
       const payload = {
         ...engine.score.snapshot(),
         revivesUsed: useAppStore.getState().revivesUsedThisRun,
+        clothesCollected: engine.clothes,
+        weaponsCollected: engine.weapons,
+        politiciansCleared: engine.politiciansCleared,
       };
       const p = useAppStore.getState().player;
       const isRecord = (p?.bestScore ?? 0) < payload.score;
@@ -224,6 +227,11 @@ export default function App() {
           y: next.y,
           z: next.z,
           entities: next.entities.map((e) => ({ ...e })),
+          clothes: next.clothes,
+          weapons: next.weapons,
+          politiciansCleared: next.politiciansCleared,
+          canEliminate: next.canEliminate,
+          nearestLabel: next.nearestPolitician?.label ?? null,
         });
       }
 
@@ -242,6 +250,16 @@ export default function App() {
       inputRef.current?.detach();
     };
   }, [screen, overlay, player?.skateboardCharges, finishRun, reduceMotion, vibrationOn]);
+
+  const onEliminate = useCallback(() => {
+    const eng = engineRef.current;
+    if (!eng) return;
+    const ok = eng.eliminateNearest();
+    if (ok) {
+      triggerHaptic(vibrationOn, 25);
+      useAppStore.getState().showToast('¡Vía libre!');
+    }
+  }, [vibrationOn]);
 
   const onSplashDone = useCallback(() => {
     const p = useAppStore.getState().player;
@@ -268,7 +286,7 @@ export default function App() {
           )}
           {screen === 'home' && <HomeHubScreen />}
           {screen === 'onboarding' && <OnboardingOverlay />}
-          {screen === 'runner' && <RunnerHUDLive />}
+          {screen === 'runner' && <RunnerHUDLive onEliminate={onEliminate} />}
           {screen === 'pause' && <PauseMenu />}
           {screen === 'gameover' && <GameOverScreen />}
           {screen === 'missions' && <MissionsScreen />}

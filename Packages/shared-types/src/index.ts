@@ -1,4 +1,4 @@
-/** Shared contracts — client + API (GDD Super Prompt §6–§8). */
+/** Shared contracts — client + API */
 
 export type AuthProvider = 'guest' | 'google' | 'apple' | 'email';
 
@@ -24,6 +24,8 @@ export interface PlayerProfile extends PlayerEconomy {
     character: string;
     backpack: string;
     skateboard: string;
+    clothes?: string;
+    weapon?: string;
   };
   ownedSkins: string[];
   adsRemoved: boolean;
@@ -37,7 +39,9 @@ export type MissionType =
   | 'use_powerup'
   | 'run_distance'
   | 'collect_pica_pollo'
-  | 'revive_count';
+  | 'revive_count'
+  | 'defeat_politician'
+  | 'collect_clothes';
 
 export type MissionScope = 'daily' | 'weekly' | 'achievement';
 
@@ -78,6 +82,9 @@ export interface RunPayload {
   slidesCount: number;
   powerupUsesCount: number;
   revivesUsed: number;
+  clothesCollected?: number;
+  weaponsCollected?: number;
+  politiciansCleared?: number;
   clientChecksum?: string;
 }
 
@@ -90,13 +97,25 @@ export interface RunResult {
   missions: MissionProgress[];
 }
 
+export type ShopCategory =
+  | 'character'
+  | 'backpack'
+  | 'skateboard'
+  | 'clothes'
+  | 'weapon'
+  | 'coins'
+  | 'offer';
+
 export interface ShopItem {
   id: string;
-  category: 'character' | 'backpack' | 'skateboard' | 'coins' | 'offer';
+  category: ShopCategory;
   name: string;
+  description?: string;
   priceCoins?: number;
   iapProductId?: string;
   previewColor: string;
+  icon?: string;
+  rarity?: 'common' | 'rare' | 'epic' | 'legend';
 }
 
 export interface SpinResult {
@@ -129,3 +148,18 @@ export function computeServerScore(input: {
 export function multiplierFromBananaStreak(streak: number): number {
   return Math.min(SCORE_FORMULA.maxMultiplier, 1 + Math.floor(streak / 10));
 }
+
+export { FULL_SHOP_CATALOG } from './catalog.js';
+
+/** Satirical arcade NPCs — caricature targets, not photoreal likenesses. */
+export const POLITICIAN_ROSTER = [
+  { id: 'luis_abinader', name: 'Luis A.', color: '#0033A0' },
+  { id: 'danilo', name: 'Danilo', color: '#C1272D' },
+  { id: 'leonel', name: 'Leonel', color: '#1D63C7' },
+  { id: 'omar_fernandez', name: 'Omar F.', color: '#2FAE47' },
+  { id: 'hipolito', name: 'Hipólito', color: '#F5C542' },
+  { id: 'carolina_mejia', name: 'Carolina M.', color: '#9B59B6' },
+  { id: 'gonzalo', name: 'Gonzalo', color: '#E67E22' },
+] as const;
+
+export type PoliticianId = (typeof POLITICIAN_ROSTER)[number]['id'];

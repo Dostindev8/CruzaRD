@@ -1,32 +1,34 @@
-# STATUS — Cruza RD (Mundo Real · LIVE)
+# Cruza RD — STATUS
 
-**Fecha:** 2026-07-26 · God-Stack-Ing  
-**Producción:** https://cruza-rd.vercel.app → **HTTP 200** (404 resuelto)  
-**GitHub:** https://github.com/Dostindev8/CruzaRD (`main` @ d459852)
+**Updated:** 2026-07-26  
+**Version:** 1.1.0 web
 
-## Causa raíz del 404
-El repo solo tenía `RFADMF.md`. Vercel no tenía `index.html` → NOT_FOUND.
+## Production
 
-## Fix aplicado
-1. Subir monorepo R3F (`apps/`, `Packages/shared-types`, `vercel.json`)
-2. `outputDirectory: apps/game-client/dist`
-3. Workspace case-sensitive: `Packages/shared-types` (Linux)
-4. `.vercelignore` excluye Unity `Library/` (upload slim)
+| Item | Value |
+|------|--------|
+| URL | https://cruza-rd.vercel.app |
+| GitHub | https://github.com/Dostindev8/CruzaRD |
+| Branch | `main` |
+| Stack | React 19 + R3F + Zustand + Vite 6 · API Express (local) |
 
-## QA producción
-| Check | Resultado |
-|---|---|
-| https://cruza-rd.vercel.app | 200 + HTML del juego |
-| /manifest.webmanifest | 200 |
-| Build Vercel | PASS (shared-types + client) |
-| GitHub main | Force-push juego completo |
+## Shipped in 1.1.0
 
-## Experiencia
-Splash RD · Hub misiones/tabla · Runner 3D OMSA/COLMADO · offline-first · full responsive
+- Street loot: clothes + weapons collectibles on track
+- Satirical politician NPCs (Abinader, Danilo, Leonel, Omar F., Hipólito, Carolina M., Gonzalo) + **ELIMINAR** (1 street weapon)
+- Full shop catalog (characters, backpacks, skateboards, clothes, weapons, coins, offers) + SVG icon library
+- Animated runner (arm/leg cycle), deeper fog/lighting, splash SVG intro, spin offline fallback
+- API: shop equip clothes/weapon · mission types `collect_clothes` / `defeat_politician` · Zod run payload extras · anti-cheat intact
 
-## Local
-```powershell
-pnpm install
-pnpm --filter @cruza-rd/api-server dev
-pnpm --filter @cruza-rd/game-client dev
-```
+## Verify
+
+1. Open https://cruza-rd.vercel.app on mobile width
+2. Play → collect ROPA/ARMA → press ELIMINAR near a politician label
+3. Tienda → tabs ROPA/ARMAS → buy with soft coins (offline OK)
+4. Giro diario works online or offline prize
+
+## Notes
+
+- Politicians are arcade caricatures, not photoreal likenesses
+- Unity `Assets/_Project` and Flutter remain legacy (EXTEND-NEVER-OVERWRITE)
+- Slim Vercel deploy excludes Unity Library / Flutter

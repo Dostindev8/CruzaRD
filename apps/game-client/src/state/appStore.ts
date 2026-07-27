@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { LeaderboardEntry, MissionProgress, PlayerProfile, ShopItem } from '@cruza-rd/shared-types';
+import { FULL_SHOP_CATALOG } from '@cruza-rd/shared-types';
 import { api } from '../services/api';
 
 export type Screen =
@@ -282,11 +283,5 @@ function localLeaderboard(self: PlayerProfile): LeaderboardEntry[] {
 }
 
 function localShop(): ShopItem[] {
-  return [
-    { id: 'skin_azul', category: 'character', name: 'Corredor Azul', priceCoins: 500, previewColor: '#1D63C7' },
-    { id: 'skin_rojo', category: 'character', name: 'Corredor Rojo', priceCoins: 500, previewColor: '#E6303F' },
-    { id: 'pack_100', category: 'coins', name: '100 monedas', iapProductId: 'coins_100', previewColor: '#FFCC4D' },
-    { id: 'pack_500', category: 'coins', name: '500 monedas', iapProductId: 'coins_500', previewColor: '#F5C542' },
-    { id: 'remove_ads', category: 'offer', name: 'Quitar anuncios', iapProductId: 'remove_ads', previewColor: '#2FAE47' },
-  ];
+  return FULL_SHOP_CATALOG;
 }

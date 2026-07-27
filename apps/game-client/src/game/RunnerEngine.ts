@@ -12,6 +12,7 @@ import {
 } from './DifficultyCurve';
 import { ScoreManager } from './ScoreManager';
 import type { Gesture } from './InputController';
+import { POLITICIAN_ROSTER, type PoliticianId } from '@cruza-rd/shared-types';
 
 export type ObstacleKind =
   | 'barrier_high'
@@ -19,9 +20,17 @@ export type ObstacleKind =
   | 'train'
   | 'container'
   | 'motoconcho'
-  | 'gap';
+  | 'gap'
+  | 'politician';
 
-export type CollectibleKind = 'banana' | 'coin' | 'pica_pollo' | 'mangu' | 'skate_charge';
+export type CollectibleKind =
+  | 'banana'
+  | 'coin'
+  | 'pica_pollo'
+  | 'mangu'
+  | 'skate_charge'
+  | 'street_clothes'
+  | 'street_weapon';
 
 export interface WorldEntity {
   id: number;
@@ -31,6 +40,9 @@ export interface WorldEntity {
   z: number;
   y: number;
   collected?: boolean;
+  politicianId?: PoliticianId;
+  label?: string;
+  color?: string;
 }
 
 export interface RunnerSnapshot {
@@ -48,6 +60,11 @@ export interface RunnerSnapshot {
   paused: boolean;
   dead: boolean;
   invulnerable: boolean;
+  clothes: number;
+  weapons: number;
+  politiciansCleared: number;
+  nearestPolitician: WorldEntity | null;
+  canEliminate: boolean;
 }
 
 let nextId = 1;
@@ -66,12 +83,14 @@ export class RunnerEngine {
   dead = false;
   invulnerable = false;
   entities: WorldEntity[] = [];
+  clothes = 0;
+  weapons = 0;
+  politiciansCleared = 0;
   private nextChunkAt = 0;
   private laneFromX = 0;
   private laneToX = 0;
   private laneLerpT = 1;
   private onDeath?: () => void;
-  private onMissionHint?: (msg: string) => void;
 
   constructor(initialSkate = 8) {
     this.skateCharges = Math.min(MAX_SKATE_CHARGES, initialSkate);
@@ -80,9 +99,8 @@ export class RunnerEngine {
     this.nextChunkAt = CHUNK_LENGTH * 2;
   }
 
-  setCallbacks(opts: { onDeath?: () => void; onMissionHint?: (msg: string) => void }) {
+  setCallbacks(opts: { onDeath?: () => void }) {
     this.onDeath = opts.onDeath;
-    this.onMissionHint = opts.onMissionHint;
   }
 
   reset(skateCharges = this.skateCharges) {
@@ -99,6 +117,9 @@ export class RunnerEngine {
     this.dead = false;
     this.invulnerable = false;
     this.entities = [];
+    this.clothes = 0;
+    this.weapons = 0;
+    this.politiciansCleared = 0;
     this.nextChunkAt = 0;
     this.spawnChunk(0);
     this.spawnChunk(CHUNK_LENGTH);
@@ -110,7 +131,6 @@ export class RunnerEngine {
     this.paused = false;
     this.invulnerable = true;
     this.skatingUntil = performance.now() / 1000 + 2;
-    // clear nearby obstacles
     this.entities = this.entities.filter((e) => e.z > this.worldZ + 18 || e.isCollectible);
   }
 
@@ -124,6 +144,41 @@ export class RunnerEngine {
     if (g === 'left') this.changeLane(-1);
     if (g === 'right') this.changeLane(1);
     if (g === 'doubleTap') this.activateSkate(nowMs / 1000);
+  }
+
+  /** Arcade clear — requires street weapon charge. Cartoon burst, not graphic. */
+  eliminateNearest(): boolean {
+    if (this.paused || this.dead) return false;
+    const target = this.findNearestPolitician();
+    if (!target || this.weapons <= 0) return false;
+    const dz = target.z - this.worldZ;
+    if (dz < 2 || dz > 16) return false;
+
+    this.weapons -= 1;
+    target.collected = true;
+    this.politiciansCleared += 1;
+    this.score.addBonus(250);
+    this.score.collectCoin();
+    this.score.collectCoin();
+    this.invulnerable = true;
+    this.skatingUntil = Math.max(this.skatingUntil, performance.now() / 1000 + 0.6);
+    return true;
+  }
+
+  findNearestPolitician(): WorldEntity | null {
+    let best: WorldEntity | null = null;
+    let bestDz = Infinity;
+    for (const e of this.entities) {
+      if (e.collected || e.kind !== 'politician') continue;
+      const dz = e.z - this.worldZ;
+      if (dz < 2 || dz > 18) continue;
+      if (Math.abs(e.lane - this.lane) > 1) continue;
+      if (dz < bestDz) {
+        bestDz = dz;
+        best = e;
+      }
+    }
+    return best;
   }
 
   private jump() {
@@ -161,7 +216,6 @@ export class RunnerEngine {
     this.worldZ += speed * dt;
     this.score.addDistance(speed * dt);
 
-    // gravity / jump
     this.velY -= 22 * dt;
     this.y += this.velY * dt;
     if (this.y < 0) {
@@ -169,7 +223,6 @@ export class RunnerEngine {
       this.velY = 0;
     }
 
-    // lane lerp
     if (this.laneLerpT < 1) {
       this.laneLerpT = Math.min(1, this.laneLerpT + (dt * 1000) / LANE_LERP_MS);
       const t = this.laneLerpT;
@@ -178,21 +231,17 @@ export class RunnerEngine {
       this.x = laneX(this.lane);
     }
 
-    // chunks
     while (this.worldZ + CHUNK_LENGTH * 1.5 > this.nextChunkAt) {
       this.spawnChunk(this.nextChunkAt, diff.obstacleDensity);
       this.nextChunkAt += CHUNK_LENGTH;
     }
 
-    // cull behind
     this.entities = this.entities.filter((e) => e.z > this.worldZ - 8);
-
     this.resolveCollisions(nowMs, skating);
     return this.snapshot();
   }
 
   private spawnChunk(z0: number, density = 0.4) {
-    // Grace period: no obstacles in the first ~25m so the player can learn controls
     if (z0 < 25) {
       for (let i = 0; i < 3; i++) {
         this.entities.push({
@@ -206,12 +255,30 @@ export class RunnerEngine {
       }
       return;
     }
+
     const count = Math.floor(2 + density * 5);
     for (let i = 0; i < count; i++) {
       const lane = Math.floor(Math.random() * LANE_COUNT);
       const z = z0 + 6 + Math.random() * (CHUNK_LENGTH - 10);
       const roll = Math.random();
-      if (roll < 0.55) {
+
+      if (roll < 0.08 && z0 > 40) {
+        const p = POLITICIAN_ROSTER[Math.floor(Math.random() * POLITICIAN_ROSTER.length)];
+        this.entities.push({
+          id: nextId++,
+          kind: 'politician',
+          isCollectible: false,
+          lane,
+          z,
+          y: 0.9,
+          politicianId: p.id,
+          label: p.name,
+          color: p.color,
+        });
+        continue;
+      }
+
+      if (roll < 0.5) {
         const kinds: ObstacleKind[] = [
           'barrier_high',
           'barrier_low',
@@ -230,19 +297,24 @@ export class RunnerEngine {
           y: kind === 'barrier_low' ? 0.4 : kind === 'gap' ? -0.5 : 0.6,
         });
       } else {
-        const ck: CollectibleKind[] =
-          Math.random() < 0.08
-            ? ['mangu']
-            : Math.random() < 0.12
-              ? ['skate_charge']
-              : Math.random() < 0.35
-                ? ['pica_pollo']
-                : Math.random() < 0.55
-                  ? ['banana']
-                  : ['coin'];
+        const r2 = Math.random();
+        const ck: CollectibleKind =
+          r2 < 0.1
+            ? 'street_clothes'
+            : r2 < 0.18
+              ? 'street_weapon'
+              : r2 < 0.26
+                ? 'mangu'
+                : r2 < 0.34
+                  ? 'skate_charge'
+                  : r2 < 0.5
+                    ? 'pica_pollo'
+                    : r2 < 0.7
+                      ? 'banana'
+                      : 'coin';
         this.entities.push({
           id: nextId++,
-          kind: ck[0],
+          kind: ck,
           isCollectible: true,
           lane,
           z,
@@ -250,8 +322,6 @@ export class RunnerEngine {
         });
       }
     }
-
-    // side dressing markers (no collision) as decorative containers far lanes — skip
   }
 
   private resolveCollisions(nowMs: number, skating: boolean) {
@@ -280,13 +350,23 @@ export class RunnerEngine {
           case 'skate_charge':
             this.skateCharges = Math.min(MAX_SKATE_CHARGES, this.skateCharges + 1);
             break;
+          case 'street_clothes':
+            this.clothes += 1;
+            this.score.addBonus(40);
+            break;
+          case 'street_weapon':
+            this.weapons += 1;
+            this.score.addBonus(60);
+            break;
         }
         continue;
       }
 
       if (skating) continue;
 
+      // Politicians block until cleared — collision = game over (arcade pressure)
       let hit = false;
+      if (e.kind === 'politician' && this.y < 1.35) hit = true;
       if (e.kind === 'barrier_high' && this.y < 1.1) hit = true;
       if (e.kind === 'barrier_low' && !sliding) hit = true;
       if (e.kind === 'gap' && this.y < 0.9) hit = true;
@@ -305,6 +385,8 @@ export class RunnerEngine {
 
   snapshot(): RunnerSnapshot {
     const nowS = performance.now() / 1000;
+    const nearest = this.findNearestPolitician();
+    const dz = nearest ? nearest.z - this.worldZ : 99;
     return {
       lane: this.lane,
       x: this.x,
@@ -320,6 +402,11 @@ export class RunnerEngine {
       paused: this.paused,
       dead: this.dead,
       invulnerable: this.invulnerable,
+      clothes: this.clothes,
+      weapons: this.weapons,
+      politiciansCleared: this.politiciansCleared,
+      nearestPolitician: nearest,
+      canEliminate: !!nearest && this.weapons > 0 && dz >= 2 && dz <= 16,
     };
   }
 }

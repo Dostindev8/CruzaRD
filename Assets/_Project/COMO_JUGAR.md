@@ -1,5 +1,5 @@
 # Cómo activar Cruza RD (paso a paso)
-
+;p[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]
 ## 1. Espera a que compile
 Abajo a la derecha en Unity: si dice **Compiling…**, espera.
 La barra roja *"All compiler errors…"* debe **desaparecer**.

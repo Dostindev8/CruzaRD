@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { WorldEntity } from '../game/RunnerEngine';
 
-/** Lightweight HUD + scene snapshot — updated from the game loop without remounting React trees. */
 export interface RunHudState {
   score: number;
   multiplier: number;
@@ -18,7 +17,12 @@ export interface RunHudState {
   y: number;
   z: number;
   entities: WorldEntity[];
-  setFromEngine: ( partial: Omit<RunHudState, 'setFromEngine' | 'reset'> ) => void;
+  clothes: number;
+  weapons: number;
+  politiciansCleared: number;
+  canEliminate: boolean;
+  nearestLabel: string | null;
+  setFromEngine: (partial: Omit<RunHudState, 'setFromEngine' | 'reset'>) => void;
   reset: () => void;
 }
 
@@ -38,6 +42,11 @@ const empty: Omit<RunHudState, 'setFromEngine' | 'reset'> = {
   y: 0,
   z: 0,
   entities: [],
+  clothes: 0,
+  weapons: 0,
+  politiciansCleared: 0,
+  canEliminate: false,
+  nearestLabel: null,
 };
 
 export const useRunStore = create<RunHudState>((set) => ({

@@ -42,6 +42,12 @@ function applyMissionProgress(playerId: string, payload: RunPayload): void {
       case 'revive_count':
         delta = payload.revivesUsed;
         break;
+      case 'collect_clothes':
+        delta = payload.clothesCollected ?? 0;
+        break;
+      case 'defeat_politician':
+        delta = payload.politiciansCleared ?? 0;
+        break;
       default:
         delta = 0;
     }
