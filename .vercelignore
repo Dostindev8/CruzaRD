@@ -1,0 +1,25 @@
+# Keep Vercel upload lean — only web monorepo sources
+Library/
+Temp/
+Logs/
+obj/
+.vs/
+UserSettings/
+MemoryCaptures/
+Recordings/
+_tools/
+.cursor/
+design-system/
+cruza_rd_flutter/
+Assets/
+Packages/manifest.json
+Packages/packages-lock.json
+node_modules/
+**/node_modules/
+**/dist/
+.pnpm-store/
+*.csproj
+*.sln
+*.apk
+*.aab
+*.unitypackage
