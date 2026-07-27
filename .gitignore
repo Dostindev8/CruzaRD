@@ -35,11 +35,9 @@
 Thumbs.db
 Desktop.ini
 
-# Unity3D generated meta noise (keep meta for assets)
 sysinfo.txt
 *.stackdump
 
-# Builds & packages
 *.apk
 *.aab
 *.unitypackage
@@ -47,11 +45,9 @@ sysinfo.txt
 *.ipa
 *.symbols.zip
 
-# Crashlytics / Firebase local
 crashlytics-build.properties
 firebase_cpp_sdk_unity/
 
-# Secrets — NEVER commit
 *.keystore
 *.jks
 *.p12
@@ -64,16 +60,30 @@ GoogleService-Info.plist
 .env.*
 !.env.example
 
-# Local extract / tooling cache
 _gdd_extract.txt
 node_modules/
 package-lock.json
 npm-debug.log*
 
-# Addressables local build cache
 ServerData/
 AddressablesBuild/
 Assets/AddressableAssetsData/*/addressables_content_state.bin
 
-# Herramientas temporales del agente (extraccion PDF, logs de compilacion)
 _tools/
+
+cruza_rd_flutter/.dart_tool/
+cruza_rd_flutter/.flutter-plugins-dependencies
+cruza_rd_flutter/build/
+cruza_rd_flutter/.env.*
+!cruza_rd_flutter/.env.example
+
+apps/*/dist/
+apps/*/node_modules/
+Packages/*/dist/
+packages/*/dist/
+node_modules/
+.pnpm-store/
+.vercel/
+.cursor/
+design-system/
+*.log

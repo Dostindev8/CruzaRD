@@ -1,0 +1,16 @@
+{
+  "name": "cruza-rd",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @cruza-rd/game-client --filter @cruza-rd/api-server dev",
+    "dev:client": "pnpm --filter @cruza-rd/game-client dev",
+    "dev:api": "pnpm --filter @cruza-rd/api-server dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

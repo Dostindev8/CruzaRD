@@ -1,53 +1,60 @@
-# Cruza RD — ¡Quítate del Medio!
+# Cruza RD — ¡Quítate del medio!
 
-Endless-crosser 3D low-poly inspirado en República Dominicana.  
-**Unity 6 + C#** · Android & iOS · Full Responsive · 60 FPS
+Endless runner dominicano (estilo Subway Surfers) ambientado en Santo Domingo.  
+Esquiva OMSAs, recolecta mangú / pica pollo / monedas, full responsive PWA.
 
-Company: **Logic Code Spot** · Bundle: `com.logiccodespot.cruzard`
+**Stack activo:** TypeScript · React 19 · React Three Fiber · Vite 6 · Zustand · Express API  
+**Studio:** Logic Code Spot · Bundle: `com.cruzard.cruza_rd`
 
-## Arranque rápido
+## Jugar (producción)
 
-1. Instala **Unity Hub** + **Unity 6 LTS** (6000.x) con módulos Android e iOS.
-2. Abre esta carpeta como proyecto Unity.
-3. Espera a que UPM resuelva paquetes (`Packages/manifest.json`).
-4. Menú **Cruza RD → Setup Prototype Scene**.
-5. Pulsa **Play**. Controles: swipe / WASD / flechas. D-pad opcional en Ajustes.
+- **Vercel:** https://cruza-rd.vercel.app  
+- Offline-first: si la API no está disponible, el juego corre en modo local.
 
-## Documentación viva
+## Arranque local
 
-| Archivo | Uso |
+```powershell
+cd CruzaRD
+corepack enable
+pnpm install
+pnpm --filter @cruza-rd/api-server dev
+pnpm --filter @cruza-rd/game-client dev
+```
+
+Abre http://localhost:5173
+
+## Controles
+
+| Input | Acción |
 |---|---|
-| `Assets/_Project/STATUS.md` | Fase actual · checklist · ancla de sesión |
-| `Assets/_Project/DESIGN_REFERENCE.md` | Resumen ejecutable del GDD |
-| `Assets/_Project/CHANGELOG.md` | Historial de cambios |
-| `Docs/Store/STORE_CHECKLIST.md` | Publicación Play / App Store |
-| `Docs/Privacy/PRIVACY_DRAFT.md` | Data Safety / App Privacy |
+| Swipe ←→ / A D | Cambiar carril |
+| Swipe ↑ / Space / W | Saltar |
+| Swipe ↓ / S | Agacharse |
+| E | Patineta |
 
-GDD maestro: `Cruza_RD_Documento_de_Ejecucion.pdf`
-
-## Arquitectura
+## Monorepo
 
 ```
-Assets/_Project/
-  Scripts/{Core,Gameplay,Characters,Economy,Progression,UI,Audio,Services,Infrastructure}
-  Art/ · Audio/ · Prefabs/ · ScriptableObjects/ · Addressables/ · Editor/ · Scenes/
+apps/game-client   → Vite + R3F (UI + motor 3D)
+apps/api-server    → Express + Zod + JWT + anti-cheat
+Packages/shared-types
+Docs/              → STATUS, Prompt Maestro exec, store
 ```
 
-- Gameplay ↔ UI desacoplados vía **EventBus**
-- Persistencia solo por **SaveService** (cifrado)
-- Economía solo por **EconomyService**
-- Object pooling desde el prototipo
+## Deploy Vercel
 
-## Seguridad
+Root `vercel.json` construye `apps/game-client/dist`.  
+Commit a `main` → deploy automático (o `vercel --prod`).
 
-- No commits de keystores, `google-services.json`, ni secrets
-- IAP: stub de validación de recibo — producción requiere backend
-- Personajes originales únicamente (GDD §4.1)
+## Referencias visuales
 
-## Build
+Splash voxel RD · Hub (misiones/tabla/jugar) · Runner HUD (pica pollo / saltos / skate).
 
-Ver `Tools/Build/README_BUILD.md`. Scripts PowerShell para Android AAB (requiere Unity en PATH).
+## Legado
 
-## Fases
+- Unity: `Assets/_Project` (no borrar)
+- Flutter: `cruza_rd_flutter` (no borrar)
 
-0 Setup → 1 Prototipo → 2 Arte → 3 Mecánicas → 4 IA → 5 Monetización → 6 Beta → 7 Launch
+## Licencia
+
+Propiedad de Logic Code Spot / Dostin Santana.
