@@ -77,7 +77,7 @@ function SimpleHome({ onPlay }: { onPlay: () => void }) {
     <>
       <div className="home-hero">
         <LogoWordmark />
-        <MarqueeBanner text={t.tagline} lines={2} />
+        <MarqueeBanner text={t.tagline} lines={1} />
       </div>
       <BottomNav onPlay={onPlay} />
       <FooterNav />
@@ -85,7 +85,7 @@ function SimpleHome({ onPlay }: { onPlay: () => void }) {
   );
 }
 
-/** Home / menú principal — layout del mockup 1. */
+/** Home / menú principal — jerarquía clara, sin solapes ni CTAs duplicados. */
 function FullHub({ onPlay }: { onPlay: () => void }) {
   const t = useI18n();
   const locale = getLocale();
@@ -148,7 +148,7 @@ function FullHub({ onPlay }: { onPlay: () => void }) {
         </div>
       </div>
 
-      <MarqueeBanner text={t.tagline} lines={2} />
+      <MarqueeBanner text={t.tagline} lines={1} />
 
       <HudPanel className="score-card">
         <span className="score-card-label">{t.currentScore}</span>
@@ -188,36 +188,6 @@ function FullHub({ onPlay }: { onPlay: () => void }) {
               {t.newMissionsIn}: <strong>{countdown}</strong>
             </div>
           </HudPanel>
-
-          <div className="quick-stack">
-            <GameButton
-              compact
-              variant="gold"
-              icon={<IconGift />}
-              onClick={() => {
-                setScreen('missions');
-                if (claimable) showToast(t.missionComplete);
-              }}
-            >
-              {t.claim}
-            </GameButton>
-            <GameButton
-              compact
-              variant="blue"
-              icon={<IconCart size={18} />}
-              onClick={() => setScreen('shop')}
-            >
-              {t.shop}
-            </GameButton>
-          </div>
-          <div className="quick-stack quick-stack--single">
-            <div style={{ position: 'relative' }}>
-              <GameButton compact variant="blue" icon={<IconSpin />} onClick={() => setScreen('spin')}>
-                {t.dailySpin}
-              </GameButton>
-              {player.spinAvailable ? <span className="notif-dot" /> : null}
-            </div>
-          </div>
         </div>
 
         <div className="hub-right">
@@ -253,6 +223,26 @@ function FullHub({ onPlay }: { onPlay: () => void }) {
         </div>
       </div>
 
+      <div className="hub-mid-actions">
+        <GameButton
+          compact
+          variant="gold"
+          icon={<IconGift />}
+          onClick={() => {
+            setScreen('missions');
+            if (claimable) showToast(t.missionComplete);
+          }}
+        >
+          {t.claim}
+        </GameButton>
+        <div style={{ position: 'relative' }}>
+          <GameButton compact variant="blue" icon={<IconSpin />} onClick={() => setScreen('spin')}>
+            {t.dailySpin}
+          </GameButton>
+          {player.spinAvailable ? <span className="notif-dot" /> : null}
+        </div>
+      </div>
+
       <BottomNav onPlay={onPlay} />
       <FooterNav />
     </>
@@ -268,12 +258,14 @@ function BottomNav({ onPlay }: { onPlay: () => void }) {
       <GameButton variant="gold" hero icon={<IconPlay />} onClick={onPlay}>
         {t.play}
       </GameButton>
-      <GameButton variant="blue" icon={<IconCart />} onClick={() => setScreen('shop')}>
-        {t.shop}
-      </GameButton>
-      <GameButton variant="purple" icon={<IconGear />} onClick={() => setScreen('settings')}>
-        {t.settings}
-      </GameButton>
+      <div className="bottom-nav-row">
+        <GameButton variant="blue" icon={<IconCart />} onClick={() => setScreen('shop')}>
+          {t.shop}
+        </GameButton>
+        <GameButton variant="purple" icon={<IconGear />} onClick={() => setScreen('settings')}>
+          {t.settings}
+        </GameButton>
+      </div>
     </div>
   );
 }
@@ -288,7 +280,7 @@ function FooterNav() {
         compact
         variant="navy"
         icon={<IconHelp size={18} />}
-        style={{ width: 'auto', minWidth: 120 }}
+        style={{ width: 'auto', minWidth: 0, flex: 1 }}
         onClick={() => setScreen('help')}
       >
         {t.help}
@@ -297,7 +289,7 @@ function FooterNav() {
         compact
         variant="navy"
         icon={<IconTrophy size={18} />}
-        style={{ width: 'auto', minWidth: 120 }}
+        style={{ width: 'auto', minWidth: 0, flex: 1 }}
         onClick={() => setScreen('leaderboard')}
       >
         {t.ranking}

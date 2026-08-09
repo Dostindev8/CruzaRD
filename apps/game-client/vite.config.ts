@@ -9,14 +9,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  // Troika (drei Text) ships a module worker — forcing r3f/drei into a manual chunk
+  // breaks `init` in production and leaves the canvas blank on Vercel.
+  worker: { format: 'es' },
   build: {
-    // The 3D runtime is isolated so the boot path (preload → intro → menu) ships without it.
-    chunkSizeWarningLimit: 800,
+    chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ['three'],
-          r3f: ['@react-three/fiber', '@react-three/drei'],
+        manualChunks(id) {
+          if (id.includes('node_modules/three/')) return 'three';
+          return undefined;
         },
       },
     },

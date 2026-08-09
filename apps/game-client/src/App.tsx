@@ -28,6 +28,7 @@ import {
   OfflineScreen,
 } from './screens';
 import { hasSeenIntroThisSession } from './screens/IntroCinematicScreen';
+import { SceneErrorBoundary } from './ui/SceneErrorBoundary';
 
 /** Three.js/R3F loads on demand so the cinematic boot sequence is not blocked by it. */
 const RunnerScene = lazy(() =>
@@ -289,13 +290,16 @@ export default function App() {
   return (
     <div className="app-frame">
       <div className="app-shell" ref={shellRef}>
-        <Suspense fallback={null}>
-          {show3d ? (
-            <RunnerScene mode={runMode ? 'run' : 'idle'} engineRef={engineRef} />
-          ) : screen === 'home' || screen === 'onboarding' ? (
-            <RunnerScene mode="idle" engineRef={engineRef} />
-          ) : null}
-        </Suspense>
+        <SceneErrorBoundary>
+          <Suspense fallback={<div className="scene-layer scene-fallback" aria-hidden="true" />}>
+            {show3d || screen === 'home' || screen === 'onboarding' ? (
+              <RunnerScene
+                mode={runMode ? 'run' : 'idle'}
+                engineRef={engineRef}
+              />
+            ) : null}
+          </Suspense>
+        </SceneErrorBoundary>
 
         {screen === 'runner' ? (
           <div className="gesture-layer" ref={gestureRef} aria-hidden />

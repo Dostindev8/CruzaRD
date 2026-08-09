@@ -1,6 +1,5 @@
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
-import { useMemo, useRef, type MutableRefObject } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { tokens } from '../theme/tokens';
 import type { RunnerEngine, WorldEntity } from './RunnerEngine';
@@ -13,15 +12,37 @@ interface Props {
   className?: string;
 }
 
+/** Keep the WebGL buffer matched to the shell — R3F can miss the first layout pass on Vercel. */
+function ResizeFix() {
+  const { gl } = useThree();
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const el = canvas.parentElement;
+    if (!el) return;
+    const sync = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      if (w > 0 && h > 0) gl.setSize(w, h, false);
+    };
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [gl]);
+  return null;
+}
+
 export function RunnerScene({ mode, engineRef, className }: Props) {
   return (
-    <div className={className ?? 'scene-layer'} aria-hidden>
+    <div className={className ?? 'scene-layer'} role="presentation">
       <Canvas
-        dpr={[1, 1.75]}
+        dpr={[1, 1.5]}
         camera={{ position: [0, 5.2, 8.5], fov: 42, near: 0.1, far: 200 }}
         gl={{ antialias: true, powerPreference: 'high-performance', alpha: false }}
         style={{ width: '100%', height: '100%', display: 'block' }}
+        resize={{ scroll: false, debounce: 0 }}
       >
+        <ResizeFix />
         <color attach="background" args={[tokens.skyTop]} />
         <fog attach="fog" args={['#8ec8ff', 32, 110]} />
         <ambientLight intensity={0.7} />
@@ -178,18 +199,10 @@ function SideDressing({
                 <boxGeometry args={[0.12, 0.7, 2.4]} />
                 <meshStandardMaterial color="#1a1a1a" />
               </mesh>
-              <Text
-                position={[b.side > 0 ? -0.1 : 0.1, 0, 0]}
-                rotation={[0, b.side > 0 ? -Math.PI / 2 : Math.PI / 2, 0]}
-                fontSize={0.38}
-                color="#FFD23F"
-                anchorX="center"
-                anchorY="middle"
-                outlineWidth={0.02}
-                outlineColor="#000"
-              >
-                COLMADO
-              </Text>
+              <mesh position={[b.side > 0 ? -0.08 : 0.08, 0, 0]}>
+                <boxGeometry args={[0.06, 0.35, 1.6]} />
+                <meshStandardMaterial color="#FFD23F" emissive="#aa8800" emissiveIntensity={0.35} />
+              </mesh>
             </group>
           ) : null}
           {i % 4 === 0 ? (
@@ -241,43 +254,28 @@ function PalmTree({ position }: { position: [number, number, number] }) {
 function LandmarkProps() {
   return (
     <group>
-      {/* Banner: ¡QUÍTATE DEL MEDIO! */}
+      {/* Banner: ¡QUÍTATE DEL MEDIO! (mesh sign — no troika workers in prod) */}
       <group position={[0, 5.1, -10]}>
         <mesh>
           <boxGeometry args={[7.2, 0.7, 0.1]} />
           <meshStandardMaterial color={tokens.uiGold} />
         </mesh>
-        <Text
-          position={[0, 0, 0.08]}
-          fontSize={0.42}
-          color="#111"
-          anchorX="center"
-          anchorY="middle"
-        >
-          ¡QUÍTATE DEL MEDIO!
-        </Text>
+        <mesh position={[0, 0, 0.08]}>
+          <boxGeometry args={[6.4, 0.28, 0.04]} />
+          <meshStandardMaterial color="#111" />
+        </mesh>
       </group>
 
-      {/* Wall: REPÚBLICA DOMINICANA */}
+      {/* Wall: República Dominicana */}
       <group position={[5.35, 2.6, -22]}>
         <mesh>
           <boxGeometry args={[0.35, 3.6, 8]} />
           <meshStandardMaterial color="#9aa3ad" />
         </mesh>
-        <Text
-          position={[-0.22, 0.4, 0]}
-          rotation={[0, -Math.PI / 2, 0]}
-          fontSize={0.32}
-          color="#fff"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={6}
-          outlineWidth={0.015}
-          outlineColor="#0033A0"
-        >
-          REPÚBLICA DOMINICANA
-        </Text>
-        {/* Mini RD flag block */}
+        <mesh position={[-0.22, 0.35, 0]} rotation={[0, -Math.PI / 2, 0]}>
+          <boxGeometry args={[5.2, 0.35, 0.06]} />
+          <meshStandardMaterial color="#fff" />
+        </mesh>
         <mesh position={[-0.25, 1.35, 2.2]}>
           <boxGeometry args={[0.08, 0.55, 0.9]} />
           <meshStandardMaterial color={tokens.rdBlue} />
@@ -386,16 +384,10 @@ function PlayerBody({ skating }: { skating: boolean }) {
         <boxGeometry args={[0.38, 0.48, 0.2]} />
         <meshStandardMaterial color="#111" />
       </mesh>
-      <Text
-        position={[0, 0.78, -0.42]}
-        rotation={[0, Math.PI, 0]}
-        fontSize={0.18}
-        color="#fff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        RD
-      </Text>
+      <mesh position={[0, 0.78, -0.42]}>
+        <boxGeometry args={[0.22, 0.14, 0.04]} />
+        <meshStandardMaterial color="#fff" />
+      </mesh>
       {skating ? (
         <mesh position={[0, -0.28, 0]}>
           <boxGeometry args={[0.75, 0.08, 0.24]} />
@@ -477,9 +469,14 @@ function PoliticianMesh({ label, color }: { label: string; color: string }) {
         <cylinderGeometry args={[0.3, 0.3, 0.12, 12]} />
         <meshStandardMaterial color="#111" />
       </mesh>
-      <Text position={[0, 2.35, 0.2]} fontSize={0.22} color="#fff" anchorX="center" outlineWidth={0.02} outlineColor="#000">
-        {label}
-      </Text>
+      <mesh position={[0, 2.35, 0.2]}>
+        <boxGeometry args={[Math.min(1.6, 0.22 * label.length), 0.22, 0.05]} />
+        <meshStandardMaterial color="#111" />
+      </mesh>
+      <mesh position={[0, 2.35, 0.24]}>
+        <boxGeometry args={[Math.min(1.4, 0.18 * label.length), 0.1, 0.04]} />
+        <meshStandardMaterial color="#fff" />
+      </mesh>
       <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.45, 16]} />
         <meshStandardMaterial color="#000" transparent opacity={0.25} />
@@ -522,9 +519,10 @@ function CollectibleMesh({ kind }: { kind: WorldEntity['kind'] }) {
           <cylinderGeometry args={[0.3, 0.3, 0.06, 12]} />
           <meshStandardMaterial color="#fff" />
         </mesh>
-        <Text position={[0, 0.05, 0.33]} fontSize={0.1} color="#fff" anchorX="center" anchorY="middle">
-          PICA
-        </Text>
+        <mesh position={[0, 0.05, 0.33]}>
+          <boxGeometry args={[0.35, 0.08, 0.04]} />
+          <meshStandardMaterial color="#fff" />
+        </mesh>
       </group>
     );
   }
@@ -557,9 +555,10 @@ function CollectibleMesh({ kind }: { kind: WorldEntity['kind'] }) {
           <boxGeometry args={[0.5, 0.35, 0.35]} />
           <meshStandardMaterial color="#1D63C7" />
         </mesh>
-        <Text position={[0, 0.35, 0]} fontSize={0.14} color="#fff" anchorX="center">
-          ROPA
-        </Text>
+        <mesh position={[0, 0.35, 0]}>
+          <boxGeometry args={[0.35, 0.08, 0.04]} />
+          <meshStandardMaterial color="#fff" />
+        </mesh>
       </group>
     );
   }
@@ -570,9 +569,10 @@ function CollectibleMesh({ kind }: { kind: WorldEntity['kind'] }) {
           <boxGeometry args={[0.12, 0.7, 0.12]} />
           <meshStandardMaterial color="#8B5A2B" />
         </mesh>
-        <Text position={[0, 0.5, 0]} fontSize={0.12} color="#FFE07A" anchorX="center">
-          ARMA
-        </Text>
+        <mesh position={[0, 0.5, 0]}>
+          <boxGeometry args={[0.3, 0.08, 0.04]} />
+          <meshStandardMaterial color="#FFE07A" />
+        </mesh>
       </group>
     );
   }
@@ -595,9 +595,10 @@ function OmsaTrain() {
         <boxGeometry args={[1.5, 0.55, 0.12]} />
         <meshStandardMaterial color={tokens.rdBlue} />
       </mesh>
-      <Text position={[0, 1.9, 2.15]} fontSize={0.28} color="#fff" anchorX="center" anchorY="middle">
-        OMSA
-      </Text>
+      <mesh position={[0, 1.9, 2.15]}>
+        <boxGeometry args={[1.1, 0.22, 0.05]} />
+        <meshStandardMaterial color="#fff" />
+      </mesh>
       <mesh position={[-0.55, 0.35, 1.4]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.28, 0.28, 0.2, 12]} />
         <meshStandardMaterial color="#222" />
@@ -636,12 +637,14 @@ function IdleProps() {
           <boxGeometry args={[1.5, 0.35, 0.08]} />
           <meshStandardMaterial color="#111" />
         </mesh>
-        <Text position={[0, 2.1, 2.42]} fontSize={0.22} color="#fff" anchorX="center" anchorY="middle">
-          27 COLMADO
-        </Text>
-        <Text position={[0, 1.4, 2.35]} fontSize={0.35} color="#fff" anchorX="center" anchorY="middle">
-          OMSA
-        </Text>
+        <mesh position={[0, 2.1, 2.42]}>
+          <boxGeometry args={[1.2, 0.16, 0.04]} />
+          <meshStandardMaterial color="#fff" />
+        </mesh>
+        <mesh position={[0, 1.4, 2.35]}>
+          <boxGeometry args={[1.0, 0.28, 0.05]} />
+          <meshStandardMaterial color="#fff" />
+        </mesh>
       </group>
       {/* Taxi */}
       <group position={[0.4, 0, 6]}>
@@ -653,9 +656,10 @@ function IdleProps() {
           <boxGeometry args={[0.7, 0.25, 0.5]} />
           <meshStandardMaterial color="#111" />
         </mesh>
-        <Text position={[0, 1.45, 0.35]} fontSize={0.16} color="#fff" anchorX="center">
-          TAXI
-        </Text>
+        <mesh position={[0, 1.45, 0.35]}>
+          <boxGeometry args={[0.45, 0.12, 0.04]} />
+          <meshStandardMaterial color="#fff" />
+        </mesh>
       </group>
       {/* Jeepeta */}
       <mesh position={[3.1, 0.85, 4]}>

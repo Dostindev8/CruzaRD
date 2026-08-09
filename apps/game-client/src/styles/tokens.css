@@ -97,29 +97,29 @@ button {
 
 .app-shell {
   position: relative;
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  max-width: 480px;
+  /* Cap by width AND by available height so portrait 9:16 never collapses flat. */
+  width: min(480px, 100vw, calc(100dvh * 9 / 16));
+  aspect-ratio: 9 / 16;
+  height: auto;
+  max-height: 100dvh;
   margin: 0 auto;
   overflow: hidden;
   background: #061225;
-  aspect-ratio: 9 / 16;
-  max-height: 100dvh;
 }
 
 @media (max-aspect-ratio: 9/16) {
   .app-shell {
-    aspect-ratio: auto;
     width: 100%;
     height: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    aspect-ratio: auto;
   }
 }
 
 @media (min-width: 768px) {
   .app-shell {
-    width: min(480px, 100vw - 48px);
-    height: min(100dvh - 24px, calc(min(480px, 100vw - 48px) * 16 / 9));
+    width: min(480px, 100vw - 48px, calc((100dvh - 24px) * 9 / 16));
     max-height: calc(100dvh - 24px);
     border-radius: 24px;
     box-shadow:
@@ -130,14 +130,28 @@ button {
 
 @media (min-width: 1280px) {
   .app-shell {
-    width: min(520px, 36vw);
+    width: min(520px, 36vw, calc((100dvh - 24px) * 9 / 16));
   }
 }
 
 .scene-layer {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 0;
+  pointer-events: none;
+}
+
+.scene-layer > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.scene-fallback {
+  background:
+    radial-gradient(ellipse at 50% 20%, #4aa3ff 0%, transparent 55%),
+    linear-gradient(180deg, #7ec8ff 0%, #8ec8ff 40%, #6b8f3a 78%, #5c4030 100%);
 }
 
 .gesture-layer {
@@ -302,26 +316,35 @@ button {
 .bottom-nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   max-width: 360px;
-  margin: auto auto 0;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+.bottom-nav-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
 }
 
 .corner-row {
   display: flex;
   justify-content: space-between;
-  margin-top: 8px;
+  margin-top: 6px;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .hub-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  flex: 1;
+  gap: 12px;
+  flex: 1 1 auto;
   min-height: 0;
-  margin: 8px 0;
+  margin: 4px 0 0;
 }
 
 .hub-left,
@@ -446,11 +469,11 @@ button {
 .hud-missions {
   position: absolute;
   left: 10px;
-  top: 28%;
-  width: min(42%, 160px);
+  top: 26%;
+  width: min(38%, 148px);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .skate-meter {
@@ -686,8 +709,14 @@ button {
 }
 
 @media (max-height: 700px) {
+  .home-hub {
+    gap: 8px;
+  }
   .hub-grid {
-    margin: 4px 0;
+    gap: 8px;
+  }
+  .hub-mid-actions {
+    margin-top: 6px;
   }
   .logo-wordmark .cruza {
     font-size: clamp(1.6rem, 8vw, 2.4rem);
@@ -696,17 +725,18 @@ button {
     font-size: clamp(2.6rem, 14vw, 4rem);
   }
   .bottom-nav {
-    gap: 8px;
+    gap: 6px;
+    margin-top: 6px;
   }
 }
 
 @media (max-width: 360px) {
-  /* Stack the panels instead of hiding them — no mockup content is lost on small phones. */
   .hub-grid {
     grid-template-columns: 1fr;
-    max-height: 42vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    gap: 10px;
+  }
+  .hub-mid-actions {
+    grid-template-columns: 1fr;
   }
   .corner-row .game-btn,
   .corner-row button {
@@ -716,6 +746,39 @@ button {
 }
 
 /* —— Prompt Maestro hub / HUD helpers —— */
+.home-hub {
+  gap: 10px;
+  justify-content: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Let the idle 3D scene read through the chrome */
+  background: transparent;
+}
+
+.home-hub .marquee-banner {
+  flex-shrink: 0;
+  margin: 2px 0 4px;
+}
+
+.home-hub .score-card {
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.hub-mid-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+.runner-hud {
+  background: transparent !important;
+}
+
 .home-hero {
   flex: 1;
   display: flex;
