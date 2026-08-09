@@ -1,0 +1,24 @@
+# Render Blueprint — API de Cruza RD.
+# El frontend se despliega en Vercel; aqui vive solo el api-server (auth, runs con
+# anti-cheat, leaderboard, misiones, giro diario).
+services:
+  - type: web
+    name: cruza-rd-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @cruza-rd/shared-types build && pnpm --filter @cruza-rd/api-server build
+    startCommand: pnpm --filter @cruza-rd/api-server start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '20'
+      # Generado por Render, nunca en el repo.
+      - key: JWT_SECRET
+        generateValue: true
+      # Origen exacto del frontend en Vercel. Ajustar al dominio real del proyecto.
+      - key: CORS_ORIGIN
+        sync: false

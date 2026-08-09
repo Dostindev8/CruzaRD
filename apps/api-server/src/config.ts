@@ -26,9 +26,20 @@ loadEnv();
 
 const isProd = process.env.NODE_ENV === 'production';
 
+const DEV_JWT_SECRET = 'dev-only-insecure-secret-change-me';
+
+function resolveJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (isProd && (!secret || secret === DEV_JWT_SECRET)) {
+    // Booting production with a public secret would let anyone forge a player token.
+    throw new Error('JWT_SECRET must be set to a strong unique value in production');
+  }
+  return secret ?? DEV_JWT_SECRET;
+}
+
 export const config = {
   port: Number(process.env.PORT ?? 8787),
-  jwtSecret: process.env.JWT_SECRET ?? 'dev-only-insecure-secret-change-me',
+  jwtSecret: resolveJwtSecret(),
   isProd,
   /**
    * Production: 15 minutes.
