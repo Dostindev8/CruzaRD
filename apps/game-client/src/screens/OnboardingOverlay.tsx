@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useI18n } from '../i18n';
 import { useAppStore } from '../state/appStore';
 import { GameButton } from '../ui/GameButton';
@@ -8,10 +8,13 @@ const STEPS = ['onboarding1', 'onboarding2', 'onboarding3'] as const;
 
 export function OnboardingOverlay() {
   const t = useI18n();
-  const { player, setPlayer, setScreen, setOverlay } = useAppStore();
+  const { setPlayer, setScreen, setOverlay } = useAppStore();
   const [step, setStep] = useState(0);
+  const busyRef = useRef(false);
 
   const finish = () => {
+    if (busyRef.current) return;
+    busyRef.current = true;
     try {
       localStorage.setItem('cruza.onboarding', '1');
       const p = useAppStore.getState().player;
@@ -27,14 +30,18 @@ export function OnboardingOverlay() {
   };
 
   const next = () => {
-    if (step >= STEPS.length - 1) {
-      finish();
-      return;
-    }
-    setStep((s) => s + 1);
+    if (busyRef.current) return;
+    setStep((s) => {
+      if (s >= STEPS.length - 1) {
+        queueMicrotask(finish);
+        return s;
+      }
+      return Math.min(s + 1, STEPS.length - 1);
+    });
   };
 
-  const label = t[STEPS[step]];
+  const safeStep = Math.min(step, STEPS.length - 1);
+  const label = t[STEPS[safeStep]];
 
   return (
     <div className="overlay-dim" role="dialog" aria-modal="true">
@@ -49,7 +56,7 @@ export function OnboardingOverlay() {
             letterSpacing: '0.08em',
           }}
         >
-          {step + 1} / {STEPS.length}
+          {safeStep + 1} / {STEPS.length}
         </div>
         <h2 className="modal-title" style={{ fontSize: '1.35rem', marginBottom: 18 }}>
           {label}
@@ -69,14 +76,14 @@ export function OnboardingOverlay() {
                 width: 10,
                 height: 10,
                 borderRadius: '50%',
-                background: i === step ? 'var(--ui-gold)' : 'rgba(255,255,255,0.25)',
+                background: i === safeStep ? 'var(--ui-gold)' : 'rgba(255,255,255,0.25)',
                 border: '1px solid var(--ui-gold)',
               }}
             />
           ))}
         </div>
         <GameButton variant="red" hero onClick={next}>
-          {step >= STEPS.length - 1 ? t.onboardingCta : t.continue}
+          {safeStep >= STEPS.length - 1 ? t.onboardingCta : t.continue}
         </GameButton>
       </HudPanel>
     </div>

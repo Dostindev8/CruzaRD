@@ -76,7 +76,6 @@ export function RunnerHUD({
     },
   ];
 
-  // Closest rival above the player — the score to beat this run.
   const rival = leaderboard
     .filter((row) => !row.isSelf && row.bestScore > score)
     .sort((a, b) => a.bestScore - b.bestScore)[0];
@@ -97,6 +96,9 @@ export function RunnerHUD({
             <span className="hud-mult">x{multiplier}</span>
           </div>
           <div className="score-big">{score.toLocaleString('es-DO')}</div>
+          {rival ? (
+            <RivalTag name={rival.displayName} targetScore={rival.bestScore} currentScore={score} />
+          ) : null}
         </div>
 
         <div className="hud-session-coins">
@@ -105,13 +107,9 @@ export function RunnerHUD({
         </div>
       </div>
 
-      <div style={{ padding: '0 12px', pointerEvents: 'none' }}>
+      <div className="hud-marquee" style={{ pointerEvents: 'none' }}>
         <MarqueeBanner text={t.tagline} lines={1} compact />
       </div>
-
-      {rival ? (
-        <RivalTag name={rival.displayName} targetScore={rival.bestScore} currentScore={score} />
-      ) : null}
 
       <div className="hud-missions" style={{ pointerEvents: 'none' }}>
         {hudMissions.map((m) => (

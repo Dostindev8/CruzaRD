@@ -11,7 +11,7 @@ interface Props {
 export function RivalTag({ name, targetScore, currentScore }: Props) {
   const passed = currentScore >= targetScore;
   return (
-    <div className={`rival-tag${passed ? ' is-passed' : ''}`} aria-live="polite">
+    <div className={`rival-tag rival-tag--inline${passed ? ' is-passed' : ''}`} aria-live="polite">
       <span>{name}</span>
       <span className="rival-tag-score">
         {passed ? '¡Superado!' : targetScore.toLocaleString('es-DO')}

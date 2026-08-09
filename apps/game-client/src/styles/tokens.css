@@ -466,31 +466,42 @@ button {
   -webkit-text-stroke: 1px #000;
 }
 
+.hud-marquee {
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+
 .hud-missions {
   position: absolute;
   left: 10px;
-  top: 26%;
-  width: min(38%, 148px);
+  top: 18%;
+  width: min(36%, 140px);
   display: flex;
   flex-direction: column;
   gap: 8px;
+  z-index: 3;
+  /* Keep the center lane clear for the runner */
+  max-height: 36%;
+  overflow: hidden;
 }
 
 .skate-meter {
   position: absolute;
   right: 10px;
-  bottom: calc(90px + var(--safe-bottom));
+  bottom: calc(72px + var(--safe-bottom));
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  z-index: 3;
+  max-height: 42%;
 }
 
 .run-loot {
   position: absolute;
   left: 10px;
-  bottom: calc(56px + var(--safe-bottom));
-  z-index: 4;
+  bottom: calc(48px + var(--safe-bottom));
+  z-index: 3;
 }
 
 .loot-row {
@@ -784,9 +795,23 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding-top: 24px;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 16px 8px 8px;
+  min-height: 0;
+}
+
+.home-hero .logo-wordmark .cruza {
+  font-size: clamp(1.7rem, 8vw, 2.6rem);
+}
+
+.home-hero .logo-wordmark .rd {
+  font-size: clamp(2.8rem, 14vw, 4.2rem);
+}
+
+.home-hero .marquee-banner {
+  width: 100%;
+  max-width: 340px;
 }
 
 .hub-top {
@@ -1835,10 +1860,6 @@ html.reduce-motion .health-bar.is-hit {
 }
 
 .rival-tag {
-  position: absolute;
-  top: 23%;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1852,6 +1873,12 @@ html.reduce-motion .health-bar.is-hit {
   color: #fff;
   text-shadow: 0 1px 2px #000;
   white-space: nowrap;
+}
+
+.rival-tag--inline {
+  margin-top: 4px;
+  position: static;
+  transform: none;
 }
 
 .rival-tag.is-passed {
