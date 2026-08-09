@@ -1,16 +1,19 @@
 import { useI18n } from '../i18n';
 import { useAppStore } from '../state/appStore';
 import { CurrencyBadge } from '../ui/CurrencyBadge';
-import { HudPanel } from '../ui/HudPanel';
-import { ProgressBar } from '../ui/ProgressBar';
 import { GameButton } from '../ui/GameButton';
+import { HealthBar } from '../ui/HealthBar';
+import { HudPanel } from '../ui/HudPanel';
+import { MarqueeBanner } from '../ui/MarqueeBanner';
+import { MissionCard } from '../ui/MissionCard';
+import { RivalTag } from '../ui/RivalTag';
+import { SkateboardWidget } from '../ui/SkateboardWidget';
 import {
   IconBanana,
   IconChicken,
   IconCoin,
   IconPause,
   IconShirt,
-  IconSkate,
   IconWeapon,
   IconZap,
 } from '../ui/IconLibrary';
@@ -18,12 +21,16 @@ import {
 export interface RunnerHUDProps {
   score: number;
   multiplier: number;
-  coins: number;
+  /** Coins collected in THIS run only — the persistent wallet lives in the Home screen. */
+  sessionCoins: number;
   picaPollo: number;
   skateCharges: number;
   distance: number;
   clothes: number;
   weapons: number;
+  health: number;
+  maxHealth: number;
+  lastHitAt: number;
   canEliminate: boolean;
   nearestLabel: string | null;
   onPause: () => void;
@@ -33,12 +40,15 @@ export interface RunnerHUDProps {
 export function RunnerHUD({
   score,
   multiplier,
-  coins,
+  sessionCoins,
   picaPollo,
   skateCharges,
   distance,
   clothes,
   weapons,
+  health,
+  maxHealth,
+  lastHitAt,
   canEliminate,
   nearestLabel,
   onPause,
@@ -46,6 +56,8 @@ export function RunnerHUD({
 }: RunnerHUDProps) {
   const t = useI18n();
   const missions = useAppStore((s) => s.missions);
+  const leaderboard = useAppStore((s) => s.leaderboard);
+
   const picaMission = missions.find((m) => m.template.type === 'collect_pica_pollo');
   const jumpMission = missions.find((m) => m.template.type === 'jump_count');
 
@@ -59,19 +71,25 @@ export function RunnerHUD({
     {
       id: 'jump',
       title: 'SALTA OBSTÁCULOS',
-      progress: jumpMission?.progress ?? 12,
+      progress: jumpMission?.progress ?? 0,
       target: jumpMission?.template.target ?? 20,
     },
   ];
 
-  const charges = Math.max(0, Math.min(8, skateCharges));
+  // Closest rival above the player — the score to beat this run.
+  const rival = leaderboard
+    .filter((row) => !row.isSelf && row.bestScore > score)
+    .sort((a, b) => a.bestScore - b.bestScore)[0];
 
   return (
     <div className="screen runner-hud" style={{ pointerEvents: 'none', padding: 0 }}>
       <div className="hud-top" style={{ padding: '10px 12px', pointerEvents: 'auto' }}>
-        <button type="button" className="hub-pause" aria-label={t.pause} onClick={onPause}>
-          <IconPause />
-        </button>
+        <div className="hud-top-left">
+          <button type="button" className="hub-pause" aria-label={t.pause} onClick={onPause}>
+            <IconPause />
+          </button>
+          <HealthBar health={health} maxHealth={maxHealth} lastHitAt={lastHitAt} />
+        </div>
 
         <div className="hud-center-score">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -79,26 +97,32 @@ export function RunnerHUD({
             <span className="hud-mult">x{multiplier}</span>
           </div>
           <div className="score-big">{score.toLocaleString('es-DO')}</div>
-          <div className="tagline-ribbon tagline-ribbon--sm" style={{ pointerEvents: 'none' }}>
-            {t.tagline}
-          </div>
         </div>
 
-        <div className="hub-wallet">
+        <div className="hud-session-coins">
           <CurrencyBadge icon={<IconChicken />} value={picaPollo} compact />
-          <CurrencyBadge icon={<IconCoin />} value={coins} compact />
+          <CurrencyBadge icon={<IconCoin />} value={sessionCoins} compact />
         </div>
       </div>
+
+      <div style={{ padding: '0 12px', pointerEvents: 'none' }}>
+        <MarqueeBanner text={t.tagline} lines={1} compact />
+      </div>
+
+      {rival ? (
+        <RivalTag name={rival.displayName} targetScore={rival.bestScore} currentScore={score} />
+      ) : null}
 
       <div className="hud-missions" style={{ pointerEvents: 'none' }}>
         {hudMissions.map((m) => (
           <HudPanel key={m.id} compact>
-            <div className="mission-row" style={{ marginBottom: 0 }}>
-              <span>
-                {m.title} {m.progress}/{m.target}
-              </span>
-              <ProgressBar value={m.progress} max={m.target} height={8} />
-            </div>
+            <MissionCard
+              id={m.id}
+              layout="card"
+              title={m.title}
+              progress={m.progress}
+              target={m.target}
+            />
           </HudPanel>
         ))}
       </div>
@@ -119,7 +143,7 @@ export function RunnerHUD({
           <GameButton variant="red" hero onClick={onEliminate}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               <IconZap size={22} />
-              ELIMINAR {nearestLabel ?? ''}
+              {t.eliminate} {nearestLabel ?? ''}
             </span>
           </GameButton>
           <p className="eliminate-hint">Usa 1 arma de la calle · arcade satírico</p>
@@ -127,34 +151,8 @@ export function RunnerHUD({
       ) : null}
 
       <div className="skate-meter" style={{ pointerEvents: 'none' }}>
-        <HudPanel
-          compact
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-            padding: '8px 10px',
-          }}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <IconSkate size={28} />
-            <div
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                marginTop: 2,
-              }}
-            >
-              {charges}
-            </div>
-          </div>
-          <div className="skate-segments">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className={`skate-seg${i < charges ? ' on' : ''}`} />
-            ))}
-          </div>
+        <HudPanel compact>
+          <SkateboardWidget charges={skateCharges} orientation="vertical" />
         </HudPanel>
       </div>
 

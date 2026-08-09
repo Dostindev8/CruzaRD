@@ -5,6 +5,7 @@ import { api } from '../services/api';
 
 export type Screen =
   | 'splash'
+  | 'intro'
   | 'home'
   | 'onboarding'
   | 'runner'
@@ -47,6 +48,13 @@ interface AppState {
   revivesUsedThisRun: number;
   runNonce: number;
   splashProgress: number;
+  /** Epoch ms of the next daily mission reset — persisted so the countdown survives reloads. */
+  missionsResetAt: number;
+  rollMissionsWindow: () => void;
+  /** Atomic end-of-run wallet commit: session totals fold into the persistent profile once. */
+  commitRunToWallet: (run: RunCommit) => void;
+  /** Deducts the configured extra-spin price. Returns false when the player cannot afford it. */
+  payForExtraSpin: (price: { tickets: number; coins: number }) => boolean;
   setSplashProgress: (n: number) => void;
   setScreen: (s: Screen) => void;
   setOverlay: (s: Screen | null) => void;
@@ -62,6 +70,40 @@ interface AppState {
   bumpRevive: () => void;
   resetRunMeta: () => void;
   bumpRunNonce: () => void;
+}
+
+export interface RunCommit {
+  score: number;
+  multiplier: number;
+  /** Coins collected during this single run (sessionCoins), not the wallet total. */
+  sessionCoins: number;
+  picaPollo: number;
+  skateCharges: number;
+}
+
+const MISSIONS_RESET_KEY = 'cruza.missionsResetAt';
+
+/** Next local midnight — daily missions roll over per player-local day, not per session. */
+function nextLocalMidnight(from = Date.now()): number {
+  const d = new Date(from);
+  d.setHours(24, 0, 0, 0);
+  return d.getTime();
+}
+
+function loadMissionsResetAt(): number {
+  try {
+    const raw = Number(localStorage.getItem(MISSIONS_RESET_KEY) || 0);
+    if (raw > Date.now()) return raw;
+  } catch {
+    /* storage blocked — fall through to a fresh window */
+  }
+  const next = nextLocalMidnight();
+  try {
+    localStorage.setItem(MISSIONS_RESET_KEY, String(next));
+  } catch {
+    /* ignore */
+  }
+  return next;
 }
 
 const defaultLocalPlayer = (): PlayerProfile => ({
@@ -112,6 +154,51 @@ export const useAppStore = create<AppState>((set, get) => ({
   revivesUsedThisRun: 0,
   runNonce: 0,
   splashProgress: 0,
+  missionsResetAt: loadMissionsResetAt(),
+
+  rollMissionsWindow: () => {
+    const next = nextLocalMidnight();
+    try {
+      localStorage.setItem(MISSIONS_RESET_KEY, String(next));
+    } catch {
+      /* ignore */
+    }
+    set({ missionsResetAt: next });
+    void get().refresh();
+  },
+
+  commitRunToWallet: (run) => {
+    const p = get().player;
+    if (!p) return;
+    set({
+      player: {
+        ...p,
+        coins: p.coins + run.sessionCoins,
+        picaPolloTickets: p.picaPolloTickets + run.picaPollo,
+        lastScore: run.score,
+        lastMultiplier: run.multiplier,
+        bestScore: Math.max(p.bestScore ?? 0, run.score),
+        skateboardCharges: run.skateCharges,
+        totalRuns: (p.totalRuns ?? 0) + 1,
+        isFirstLaunch: false,
+        onboardingSeen: true,
+      },
+    });
+  },
+
+  payForExtraSpin: (price) => {
+    const p = get().player;
+    if (!p) return false;
+    if (p.picaPolloTickets >= price.tickets) {
+      set({ player: { ...p, picaPolloTickets: p.picaPolloTickets - price.tickets } });
+      return true;
+    }
+    if (p.coins >= price.coins) {
+      set({ player: { ...p, coins: p.coins - price.coins } });
+      return true;
+    }
+    return false;
+  },
 
   setSplashProgress: (splashProgress) => set({ splashProgress }),
   setScreen: (screen) => set({ screen, overlay: null }),

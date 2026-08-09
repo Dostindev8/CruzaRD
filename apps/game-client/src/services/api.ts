@@ -28,6 +28,17 @@ function setToken(t: string) {
   localStorage.setItem('cruza.token', t);
 }
 
+/** Carries the HTTP status so callers can tell "server said no" from "server unreachable". */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -38,11 +49,12 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 
   const res = await fetch(`${API}${path}`, { ...init, headers });
   if (!res.ok) {
-    const body = await res.json().catch(() => ({} as Record<string, string>));
-    throw new Error(
+    const body = await res.json().catch(() => ({}) as Record<string, string>);
+    throw new ApiError(
       (body as { error?: string; message?: string }).error ||
         (body as { message?: string }).message ||
         `HTTP ${res.status}`,
+      res.status,
     );
   }
   return res.json() as Promise<T>;

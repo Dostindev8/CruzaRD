@@ -1,9 +1,14 @@
+import { useCallback } from 'react';
+import type { MissionProgress } from '@cruza-rd/shared-types';
 import { getLocale, useI18n } from '../i18n';
 import { useAppStore } from '../state/appStore';
 import { CurrencyBadge } from '../ui/CurrencyBadge';
 import { GameButton } from '../ui/GameButton';
 import { HudPanel } from '../ui/HudPanel';
-import { ProgressBar } from '../ui/ProgressBar';
+import { MarqueeBanner } from '../ui/MarqueeBanner';
+import { MissionCard } from '../ui/MissionCard';
+import { SkateboardWidget } from '../ui/SkateboardWidget';
+import { useCountdown } from '../ui/useCountdown';
 import {
   IconCart,
   IconChicken,
@@ -22,6 +27,19 @@ import {
 
 function isNewPlayerLayout(player: NonNullable<ReturnType<typeof useAppStore.getState>['player']>) {
   return player.isFirstLaunch || (player.totalRuns === 0 && player.bestScore === 0);
+}
+
+function missionIcon(type: MissionProgress['template']['type']) {
+  switch (type) {
+    case 'collect_coins':
+      return <IconCoin size={16} />;
+    case 'use_powerup':
+      return <IconSkate size={16} />;
+    case 'collect_pica_pollo':
+      return <IconChicken size={16} />;
+    default:
+      return <IconPlay size={14} />;
+  }
 }
 
 export function HomeHubScreen() {
@@ -54,44 +72,34 @@ export function HomeHubScreen() {
 
 function SimpleHome({ onPlay }: { onPlay: () => void }) {
   const t = useI18n();
-  const setScreen = useAppStore((s) => s.setScreen);
 
   return (
     <>
       <div className="home-hero">
         <LogoWordmark />
-        <div className="tagline-ribbon">{t.tagline}</div>
+        <MarqueeBanner text={t.tagline} lines={2} />
       </div>
       <BottomNav onPlay={onPlay} />
-      <div className="corner-row">
-        <GameButton
-          compact
-          variant="navy"
-          icon={<IconHelp size={18} />}
-          style={{ width: 'auto', minWidth: 120 }}
-          onClick={() => setScreen('help')}
-        >
-          {t.help}
-        </GameButton>
-        <GameButton
-          compact
-          variant="navy"
-          icon={<IconTrophy size={18} />}
-          style={{ width: 'auto', minWidth: 120 }}
-          onClick={() => setScreen('leaderboard')}
-        >
-          {t.ranking}
-        </GameButton>
-      </div>
+      <FooterNav />
     </>
   );
 }
 
-/** Imagen 2 — hub post-partida pixel layout */
+/** Home / menú principal — layout del mockup 1. */
 function FullHub({ onPlay }: { onPlay: () => void }) {
   const t = useI18n();
   const locale = getLocale();
-  const { player, missions, leaderboard, setScreen, showToast } = useAppStore();
+  const player = useAppStore((s) => s.player);
+  const missions = useAppStore((s) => s.missions);
+  const leaderboard = useAppStore((s) => s.leaderboard);
+  const missionsResetAt = useAppStore((s) => s.missionsResetAt);
+  const rollMissionsWindow = useAppStore((s) => s.rollMissionsWindow);
+  const setScreen = useAppStore((s) => s.setScreen);
+  const showToast = useAppStore((s) => s.showToast);
+
+  const onExpire = useCallback(() => rollMissionsWindow(), [rollMissionsWindow]);
+  const countdown = useCountdown(missionsResetAt, onExpire);
+
   if (!player) return null;
 
   const claimable = missions.find((m) => m.completed && !m.claimed);
@@ -101,8 +109,7 @@ function FullHub({ onPlay }: { onPlay: () => void }) {
     )
     .slice(0, 3);
   const shown = hubMissions.length ? hubMissions : missions.slice(0, 3);
-  const top5 = leaderboard.slice(0, 5);
-  const charges = Math.max(0, Math.min(8, player.skateboardCharges));
+  const top3 = leaderboard.slice(0, 3);
 
   return (
     <>
@@ -116,21 +123,14 @@ function FullHub({ onPlay }: { onPlay: () => void }) {
           <IconPause />
         </button>
 
-        <div className="hub-brand">
-          <button type="button" onClick={() => setScreen('characters')} style={{ padding: 0 }}>
-            <LogoWordmark compact />
-          </button>
-          <div className="tagline-ribbon tagline-ribbon--sm">{t.tagline}</div>
-        </div>
-
-        <div className="hub-score-block">
-          <div className="hub-mult">x{player.lastMultiplier || 1}</div>
-          <div className="score-big hub-score">{(player.lastScore || 0).toLocaleString('es-DO')}</div>
-          <div className="hub-best">
-            <IconCrown size={14} />
-            {t.best}: {(player.bestScore ?? 0).toLocaleString('es-DO')}
-          </div>
-        </div>
+        <button
+          type="button"
+          className="hub-brand"
+          aria-label={t.appName}
+          onClick={() => setScreen('characters')}
+        >
+          <LogoWordmark compact />
+        </button>
 
         <div className="hub-wallet">
           <CurrencyBadge
@@ -139,37 +139,64 @@ function FullHub({ onPlay }: { onPlay: () => void }) {
             onPlus={() => setScreen('shop')}
             compact
           />
-          <CurrencyBadge icon={<IconChicken />} value={player.picaPolloTickets ?? 0} compact />
+          <CurrencyBadge
+            icon={<IconChicken />}
+            value={player.picaPolloTickets ?? 0}
+            onPlus={() => setScreen('shop')}
+            compact
+          />
         </div>
       </div>
 
+      <MarqueeBanner text={t.tagline} lines={2} />
+
+      <HudPanel className="score-card">
+        <span className="score-card-label">{t.currentScore}</span>
+        <span className="score-card-value">{(player.lastScore || 0).toLocaleString('es-DO')}</span>
+        <span className="score-card-best">
+          <IconCrown size={14} />
+          {t.best}: {(player.bestScore ?? 0).toLocaleString('es-DO')}
+        </span>
+      </HudPanel>
+
       <div className="hub-grid">
         <div className="hub-left">
-          <HudPanel title={t.missions} style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-            {shown.map((m) => {
-              const titleObj = m.template?.title;
-              const title =
-                (titleObj && (titleObj[locale] || titleObj['es-DO'] || titleObj.en)) ||
-                m.missionTemplateId;
-              return (
-                <div key={m.missionTemplateId} className="mission-row">
-                  <span>
-                    {title} {m.progress ?? 0}/{m.template?.target ?? 1}
-                  </span>
-                  <ProgressBar value={m.progress ?? 0} max={m.template?.target ?? 1} height={8} />
-                </div>
-              );
-            })}
+          <HudPanel className="panel-flex">
+            <div className="panel-head">
+              <IconSpin size={18} />
+              <span>{t.dailyMissions}</span>
+            </div>
+            <div className="panel-scroll">
+              {shown.map((m) => {
+                const titleObj = m.template?.title;
+                const title =
+                  (titleObj && (titleObj[locale] || titleObj['es-DO'] || titleObj.en)) ||
+                  m.missionTemplateId;
+                return (
+                  <MissionCard
+                    key={m.missionTemplateId}
+                    id={m.missionTemplateId}
+                    title={title}
+                    progress={m.progress ?? 0}
+                    target={m.template?.target ?? 1}
+                    icon={missionIcon(m.template.type)}
+                  />
+                );
+              })}
+            </div>
+            <div className="missions-countdown">
+              {t.newMissionsIn}: <strong>{countdown}</strong>
+            </div>
           </HudPanel>
 
           <div className="quick-stack">
             <GameButton
               compact
-              variant="blue"
+              variant="gold"
               icon={<IconGift />}
               onClick={() => {
                 setScreen('missions');
-                if (claimable) showToast(t.claim);
+                if (claimable) showToast(t.missionComplete);
               }}
             >
               {t.claim}
@@ -182,13 +209,10 @@ function FullHub({ onPlay }: { onPlay: () => void }) {
             >
               {t.shop}
             </GameButton>
+          </div>
+          <div className="quick-stack quick-stack--single">
             <div style={{ position: 'relative' }}>
-              <GameButton
-                compact
-                variant="blue"
-                icon={<IconSpin />}
-                onClick={() => setScreen('spin')}
-              >
+              <GameButton compact variant="blue" icon={<IconSpin />} onClick={() => setScreen('spin')}>
                 {t.dailySpin}
               </GameButton>
               {player.spinAvailable ? <span className="notif-dot" /> : null}
@@ -197,66 +221,40 @@ function FullHub({ onPlay }: { onPlay: () => void }) {
         </div>
 
         <div className="hub-right">
-          <HudPanel title={t.table} style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-            {top5.map((row) => (
-              <div key={row.playerId} className={`lb-row${row.isSelf ? ' self' : ''}`}>
-                <span style={{ width: 18 }}>{row.rank}</span>
-                <span className="lb-avatar" />
-                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {row.displayName}
-                </span>
-                <span>{(row.bestScore ?? 0).toLocaleString('es-DO')}</span>
-              </div>
-            ))}
+          <HudPanel className="panel-flex">
+            <div className="panel-head">
+              <IconTrophy size={18} />
+              <span>{t.leaderboardTitle}</span>
+            </div>
+            <div className="panel-scroll">
+              {top3.map((row) => (
+                <div key={row.playerId} className={`lb-row${row.isSelf ? ' self' : ''}`}>
+                  <span className="lb-rank">{row.rank}</span>
+                  <span className="lb-avatar" />
+                  <span className="lb-name">{row.isSelf ? t.you : row.displayName}</span>
+                  <span className="lb-score">{(row.bestScore ?? 0).toLocaleString('es-DO')}</span>
+                </div>
+              ))}
+            </div>
           </HudPanel>
 
-          <HudPanel title={t.skateboard} compact>
-            <div className="skate-panel">
-              <div className="skate-panel-left">
-                <IconSkate size={36} />
-                <div className="skate-count-row">
-                  <strong>{charges}</strong>
-                  <button
-                    type="button"
-                    aria-label="Buy skate"
-                    onClick={() => setScreen('shop')}
-                    className="plus-chip"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-              <div className="skate-segments skate-segments--vertical">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className={`skate-seg${i < charges ? ' on' : ''}`} />
-                ))}
-              </div>
+          <HudPanel compact>
+            <div className="panel-head panel-head--sm">
+              <IconSkate size={16} />
+              <span>{t.skateboard}</span>
             </div>
+            <SkateboardWidget
+              charges={player.skateboardCharges}
+              showLevel
+              levelLabel={t.level}
+              onUpgrade={() => setScreen('shop')}
+            />
           </HudPanel>
         </div>
       </div>
 
       <BottomNav onPlay={onPlay} />
-      <div className="corner-row">
-        <GameButton
-          compact
-          variant="navy"
-          icon={<IconHelp size={18} />}
-          style={{ width: 'auto', minWidth: 120 }}
-          onClick={() => setScreen('help')}
-        >
-          {t.help}
-        </GameButton>
-        <GameButton
-          compact
-          variant="navy"
-          icon={<IconTrophy size={18} />}
-          style={{ width: 'auto', minWidth: 120 }}
-          onClick={() => setScreen('leaderboard')}
-        >
-          {t.ranking}
-        </GameButton>
-      </div>
+      <FooterNav />
     </>
   );
 }
@@ -267,14 +265,42 @@ function BottomNav({ onPlay }: { onPlay: () => void }) {
 
   return (
     <div className="bottom-nav">
-      <GameButton variant="red" hero icon={<IconPlay />} onClick={onPlay}>
+      <GameButton variant="gold" hero icon={<IconPlay />} onClick={onPlay}>
         {t.play}
       </GameButton>
       <GameButton variant="blue" icon={<IconCart />} onClick={() => setScreen('shop')}>
         {t.shop}
       </GameButton>
-      <GameButton variant="green" icon={<IconGear />} onClick={() => setScreen('settings')}>
+      <GameButton variant="purple" icon={<IconGear />} onClick={() => setScreen('settings')}>
         {t.settings}
+      </GameButton>
+    </div>
+  );
+}
+
+function FooterNav() {
+  const t = useI18n();
+  const setScreen = useAppStore((s) => s.setScreen);
+
+  return (
+    <div className="corner-row">
+      <GameButton
+        compact
+        variant="navy"
+        icon={<IconHelp size={18} />}
+        style={{ width: 'auto', minWidth: 120 }}
+        onClick={() => setScreen('help')}
+      >
+        {t.help}
+      </GameButton>
+      <GameButton
+        compact
+        variant="navy"
+        icon={<IconTrophy size={18} />}
+        style={{ width: 'auto', minWidth: 120 }}
+        onClick={() => setScreen('leaderboard')}
+      >
+        {t.ranking}
       </GameButton>
     </div>
   );

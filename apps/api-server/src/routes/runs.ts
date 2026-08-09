@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireAuth, type AuthedRequest } from '../middleware/auth.js';
+import { economyLimiter } from '../middleware/rateLimit.js';
 import { validate } from '../middleware/validate.js';
 import { runPayloadSchema } from '../schemas.js';
 import { submitRun } from '../services/runService.js';
@@ -8,6 +9,7 @@ export const runsRouter = Router();
 
 runsRouter.post(
   '/',
+  economyLimiter,
   requireAuth,
   validate(runPayloadSchema),
   (req: AuthedRequest, res, next) => {

@@ -3,11 +3,12 @@ import type {
   PlayerProfile,
 } from '@cruza-rd/shared-types';
 import type { IStore, MissionState, PlayerRecord } from '../store/types.js';
+import { sanitizeDisplayName } from '../utils/sanitize.js';
 
 export function toPublicPlayer(player: PlayerRecord): PlayerProfile {
   return {
     id: player.id,
-    displayName: player.displayName,
+    displayName: sanitizeDisplayName(player.displayName),
     countryCode: player.countryCode,
     coins: player.coins,
     picaPolloTickets: player.picaPolloTickets,

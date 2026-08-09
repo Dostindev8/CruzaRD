@@ -1,12 +1,14 @@
 import type { CSSProperties, ReactNode, ButtonHTMLAttributes } from 'react';
 
-type Variant = 'red' | 'blue' | 'green' | 'navy';
+type Variant = 'red' | 'blue' | 'green' | 'navy' | 'gold' | 'purple';
 
 const bevel: Record<Variant, string> = {
   red: 'var(--bevel-red)',
   blue: 'var(--bevel-blue)',
   green: 'var(--bevel-green)',
   navy: 'var(--bevel-navy)',
+  gold: 'var(--bevel-gold)',
+  purple: 'var(--bevel-purple)',
 };
 
 const fill: Record<Variant, string> = {
@@ -14,6 +16,8 @@ const fill: Record<Variant, string> = {
   blue: 'linear-gradient(165deg, #4a8ef0, var(--btn-blue) 45%, var(--btn-blue-dark))',
   green: 'linear-gradient(165deg, #55d86a, var(--btn-green) 45%, var(--btn-green-dark))',
   navy: 'linear-gradient(165deg, #1e3f6e, var(--ui-navy) 45%, #061225)',
+  gold: 'linear-gradient(165deg, #ffd166, var(--btn-gold) 45%, var(--btn-gold-dark))',
+  purple: 'linear-gradient(165deg, #b674f5, var(--btn-purple) 45%, var(--btn-purple-dark))',
 };
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {

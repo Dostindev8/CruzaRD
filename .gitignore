@@ -74,6 +74,13 @@ _tools/
 cruza_rd_flutter/.dart_tool/
 cruza_rd_flutter/.flutter-plugins-dependencies
 cruza_rd_flutter/build/
+cruza_rd_flutter/android/build/
+cruza_rd_flutter/android/.gradle/
+cruza_rd_flutter/android/local.properties
+cruza_rd_flutter/ios/Pods/
+
+# Legacy Unity sandbox — nested git repo, not part of this monorepo
+My project (2)/
 cruza_rd_flutter/.env.*
 !cruza_rd_flutter/.env.example
 

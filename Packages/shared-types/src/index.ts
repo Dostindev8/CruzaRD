@@ -118,8 +118,109 @@ export interface ShopItem {
   rarity?: 'common' | 'rare' | 'epic' | 'legend';
 }
 
+export type SpinPrizeType =
+  | 'coins'
+  | 'picaPollo'
+  | 'skateboard'
+  | 'skin'
+  | 'spin_again';
+
+export type SpinRarity = 'common' | 'uncommon' | 'rare' | 'epic';
+
+export interface SpinPrizeDef {
+  id: string;
+  prizeType: SpinPrizeType;
+  amount: number;
+  /** Relative weight inside the loot table. */
+  weight: number;
+  rarity: SpinRarity;
+  label: { 'es-DO': string; en: string };
+}
+
+/**
+ * Canonical daily-spin loot table. Client renders the wheel from this order and
+ * the server picks the winner from these weights, so a segment index always means
+ * the same prize on both sides.
+ */
+export const SPIN_PRIZE_TABLE: readonly SpinPrizeDef[] = [
+  {
+    id: 'coins_50',
+    prizeType: 'coins',
+    amount: 50,
+    weight: 28,
+    rarity: 'common',
+    label: { 'es-DO': '+50 monedas', en: '+50 coins' },
+  },
+  {
+    id: 'coins_100',
+    prizeType: 'coins',
+    amount: 100,
+    weight: 22,
+    rarity: 'common',
+    label: { 'es-DO': '+100 monedas', en: '+100 coins' },
+  },
+  {
+    id: 'pica_2',
+    prizeType: 'picaPollo',
+    amount: 2,
+    weight: 16,
+    rarity: 'uncommon',
+    label: { 'es-DO': '+2 Pica Pollo', en: '+2 Pica Pollo' },
+  },
+  {
+    id: 'coins_250',
+    prizeType: 'coins',
+    amount: 250,
+    weight: 12,
+    rarity: 'uncommon',
+    label: { 'es-DO': '+250 monedas', en: '+250 coins' },
+  },
+  {
+    id: 'skate_1',
+    prizeType: 'skateboard',
+    amount: 1,
+    weight: 10,
+    rarity: 'rare',
+    label: { 'es-DO': '+1 Patineta', en: '+1 Skateboard' },
+  },
+  {
+    id: 'pica_5',
+    prizeType: 'picaPollo',
+    amount: 5,
+    weight: 7,
+    rarity: 'rare',
+    label: { 'es-DO': '+5 Pica Pollo', en: '+5 Pica Pollo' },
+  },
+  {
+    id: 'coins_500',
+    prizeType: 'coins',
+    amount: 500,
+    weight: 3,
+    rarity: 'epic',
+    label: { 'es-DO': '+500 monedas', en: '+500 coins' },
+  },
+  {
+    id: 'spin_again',
+    prizeType: 'spin_again',
+    amount: 25,
+    weight: 2,
+    rarity: 'epic',
+    label: { 'es-DO': '¡Vuelve a girar!', en: 'Spin again!' },
+  },
+] as const;
+
+export const SPIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+/** Cost of an extra spin once the free daily one is consumed. */
+export const EXTRA_SPIN_COST = {
+  tickets: 1,
+  coins: 50,
+} as const;
+
 export interface SpinResult {
-  prizeType: 'coins' | 'picaPollo' | 'skateboard' | 'skin' | 'spin_again';
+  /** Matches an id in SPIN_PRIZE_TABLE so the client can animate to that segment. */
+  prizeId?: string;
+  prizeType: SpinPrizeType;
   amount: number;
   label: string;
   player: PlayerProfile;

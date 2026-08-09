@@ -16,3 +16,12 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req: Request) => ipKeyGenerator(req.ip ?? 'unknown'),
 });
+
+/** Economy endpoints (spin, run submit) get a tighter budget than plain reads. */
+export const economyLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 12,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => ipKeyGenerator(req.ip ?? 'unknown'),
+});

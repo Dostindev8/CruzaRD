@@ -1,4 +1,6 @@
 export { SplashScreen } from './SplashScreen';
+export { TechPreloadScreen } from './TechPreloadScreen';
+export { IntroCinematicScreen } from './IntroCinematicScreen';
 export { HomeHubScreen } from './HomeHubScreen';
 export { OnboardingOverlay } from './OnboardingOverlay';
 export { RunnerHUD } from './RunnerHUD';

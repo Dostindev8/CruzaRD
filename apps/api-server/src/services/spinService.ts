@@ -1,19 +1,24 @@
-import type { SpinResult } from '@cruza-rd/shared-types';
+import {
+  SPIN_COOLDOWN_MS,
+  SPIN_PRIZE_TABLE,
+  type SpinPrizeDef,
+  type SpinResult,
+} from '@cruza-rd/shared-types';
 import { store } from '../store/index.js';
 import { conflict } from '../utils/errors.js';
 import { toPublicPlayer, touchPlayer } from './playerMapper.js';
 import { requirePlayer } from './leaderboardService.js';
 
-const SPIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
-
-const PRIZES: Array<Omit<SpinResult, 'player'>> = [
-  { prizeType: 'coins', amount: 50, label: '+50 monedas' },
-  { prizeType: 'coins', amount: 100, label: '+100 monedas' },
-  { prizeType: 'coins', amount: 250, label: '+250 monedas' },
-  { prizeType: 'picaPollo', amount: 1, label: '+1 Pica Pollo' },
-  { prizeType: 'skateboard', amount: 1, label: '+1 Skateboard' },
-  { prizeType: 'spin_again', amount: 0, label: '¡Gira otra vez!' },
-];
+/** Server is the source of truth for which segment wins — the client only animates to it. */
+function pickWeighted(): SpinPrizeDef {
+  const total = SPIN_PRIZE_TABLE.reduce((sum, p) => sum + p.weight, 0);
+  let roll = Math.random() * total;
+  for (const prize of SPIN_PRIZE_TABLE) {
+    roll -= prize.weight;
+    if (roll <= 0) return prize;
+  }
+  return SPIN_PRIZE_TABLE[SPIN_PRIZE_TABLE.length - 1]!;
+}
 
 export function spinDaily(playerId: string): SpinResult {
   const player = requirePlayer(playerId);
@@ -27,7 +32,7 @@ export function spinDaily(playerId: string): SpinResult {
     throw conflict('Daily spin already used. Come back tomorrow.');
   }
 
-  const prize = PRIZES[Math.floor(Math.random() * PRIZES.length)]!;
+  const prize = pickWeighted();
   let next = touchPlayer({ ...player, lastSpinAt: now, spinAvailable: false });
 
   switch (prize.prizeType) {
@@ -47,12 +52,18 @@ export function spinDaily(playerId: string): SpinResult {
       };
       break;
     case 'spin_again':
-      next = { ...next, spinAvailable: true };
+      next = { ...next, coins: next.coins + prize.amount, spinAvailable: true };
       break;
     case 'skin':
       break;
   }
 
   store.upsertPlayer(next);
-  return { ...prize, player: toPublicPlayer(next) };
+  return {
+    prizeId: prize.id,
+    prizeType: prize.prizeType,
+    amount: prize.amount,
+    label: prize.label['es-DO'],
+    player: toPublicPlayer(next),
+  };
 }

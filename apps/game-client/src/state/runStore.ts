@@ -1,9 +1,10 @@
 import { create } from 'zustand';
-import type { WorldEntity } from '../game/RunnerEngine';
+import { MAX_HEALTH, type WorldEntity } from '../game/RunnerEngine';
 
 export interface RunHudState {
   score: number;
   multiplier: number;
+  /** Session-only coin count for this run; the persistent wallet lives in appStore. */
   coins: number;
   picaPollo: number;
   bananas: number;
@@ -13,6 +14,9 @@ export interface RunHudState {
   jumping: boolean;
   skating: boolean;
   dead: boolean;
+  health: number;
+  maxHealth: number;
+  lastHitAt: number;
   x: number;
   y: number;
   z: number;
@@ -38,6 +42,9 @@ const empty: Omit<RunHudState, 'setFromEngine' | 'reset'> = {
   jumping: false,
   skating: false,
   dead: false,
+  health: MAX_HEALTH,
+  maxHealth: MAX_HEALTH,
+  lastHitAt: 0,
   x: 0,
   y: 0,
   z: 0,

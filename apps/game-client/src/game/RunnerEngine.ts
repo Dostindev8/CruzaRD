@@ -60,6 +60,10 @@ export interface RunnerSnapshot {
   paused: boolean;
   dead: boolean;
   invulnerable: boolean;
+  health: number;
+  maxHealth: number;
+  /** Epoch ms of the last damage taken — the HUD uses it to fire the hit animation. */
+  lastHitAt: number;
   clothes: number;
   weapons: number;
   politiciansCleared: number;
@@ -68,6 +72,11 @@ export interface RunnerSnapshot {
 }
 
 let nextId = 1;
+
+/** Hits the runner survives before the run ends. */
+export const MAX_HEALTH = 3;
+/** Grace window after taking damage so a single obstacle cannot drain several hits. */
+const DAMAGE_IFRAME_MS = 1200;
 
 export class RunnerEngine {
   score = new ScoreManager();
@@ -82,6 +91,11 @@ export class RunnerEngine {
   paused = false;
   dead = false;
   invulnerable = false;
+  health = MAX_HEALTH;
+  maxHealth = MAX_HEALTH;
+  lastHitAt = 0;
+  private hitIFramesUntil = 0;
+  private onHit?: (health: number) => void;
   entities: WorldEntity[] = [];
   clothes = 0;
   weapons = 0;
@@ -99,8 +113,9 @@ export class RunnerEngine {
     this.nextChunkAt = CHUNK_LENGTH * 2;
   }
 
-  setCallbacks(opts: { onDeath?: () => void }) {
+  setCallbacks(opts: { onDeath?: () => void; onHit?: (health: number) => void }) {
     this.onDeath = opts.onDeath;
+    this.onHit = opts.onHit;
   }
 
   reset(skateCharges = this.skateCharges) {
@@ -116,6 +131,9 @@ export class RunnerEngine {
     this.paused = false;
     this.dead = false;
     this.invulnerable = false;
+    this.health = MAX_HEALTH;
+    this.lastHitAt = 0;
+    this.hitIFramesUntil = 0;
     this.entities = [];
     this.clothes = 0;
     this.weapons = 0;
@@ -130,6 +148,8 @@ export class RunnerEngine {
     this.dead = false;
     this.paused = false;
     this.invulnerable = true;
+    this.health = MAX_HEALTH;
+    this.hitIFramesUntil = performance.now() + DAMAGE_IFRAME_MS;
     this.skatingUntil = performance.now() / 1000 + 2;
     this.entities = this.entities.filter((e) => e.z > this.worldZ + 18 || e.isCollectible);
   }
@@ -375,16 +395,26 @@ export class RunnerEngine {
       }
 
       if (hit) {
+        if (nowMs < this.hitIFramesUntil) continue;
         this.score.resetStreak();
-        this.dead = true;
-        this.onDeath?.();
+        this.health = Math.max(0, this.health - 1);
+        this.lastHitAt = nowMs;
+        this.hitIFramesUntil = nowMs + DAMAGE_IFRAME_MS;
+        // Clear the obstacle so the runner is not re-hit by the same body next frame.
+        e.collected = true;
+        this.onHit?.(this.health);
+        if (this.health <= 0) {
+          this.dead = true;
+          this.onDeath?.();
+        }
         break;
       }
     }
   }
 
   snapshot(): RunnerSnapshot {
-    const nowS = performance.now() / 1000;
+    const nowMs = performance.now();
+    const nowS = nowMs / 1000;
     const nearest = this.findNearestPolitician();
     const dz = nearest ? nearest.z - this.worldZ : 99;
     return {
@@ -401,7 +431,10 @@ export class RunnerEngine {
       score: this.score,
       paused: this.paused,
       dead: this.dead,
-      invulnerable: this.invulnerable,
+      invulnerable: this.invulnerable || nowMs < this.hitIFramesUntil,
+      health: this.health,
+      maxHealth: this.maxHealth,
+      lastHitAt: this.lastHitAt,
       clothes: this.clothes,
       weapons: this.weapons,
       politiciansCleared: this.politiciansCleared,

@@ -2,6 +2,7 @@ import type { LeaderboardEntry } from '@cruza-rd/shared-types';
 import { store } from '../store/index.js';
 import { weekKey } from '../store/seed.js';
 import { notFound } from '../utils/errors.js';
+import { sanitizeDisplayName } from '../utils/sanitize.js';
 
 export function getLeaderboard(
   scope: 'global' | 'weekly',
@@ -37,7 +38,7 @@ export function getLeaderboard(
   return sorted.slice(0, 50).map((entry, i) => ({
     rank: i + 1,
     playerId: entry.playerId,
-    displayName: entry.displayName,
+    displayName: sanitizeDisplayName(entry.displayName),
     bestScore: entry.bestScore,
     isSelf: selfPlayerId ? entry.playerId === selfPlayerId : false,
   }));

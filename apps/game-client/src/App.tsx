@@ -1,5 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { RunnerScene } from './game/RunnerScene';
+import { useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { RunnerEngine } from './game/RunnerEngine';
 import { InputController } from './game/InputController';
 import { triggerHaptic, triggerHitStop, triggerScreenShake } from './game/GameFeel';
@@ -12,7 +11,8 @@ import { enqueueRun, flushRunQueue } from './services/offlineQueue';
 import { DebugUiPage } from './screens/DebugUiPage';
 import { RunnerHUDLive } from './screens/RunnerHUDLive';
 import {
-  SplashScreen,
+  TechPreloadScreen,
+  IntroCinematicScreen,
   HomeHubScreen,
   OnboardingOverlay,
   PauseMenu,
@@ -27,6 +27,12 @@ import {
   HelpScreen,
   OfflineScreen,
 } from './screens';
+import { hasSeenIntroThisSession } from './screens/IntroCinematicScreen';
+
+/** Three.js/R3F loads on demand so the cinematic boot sequence is not blocked by it. */
+const RunnerScene = lazy(() =>
+  import('./game/RunnerScene').then((m) => ({ default: m.RunnerScene })),
+);
 
 export default function App() {
   const screen = useAppStore((s) => s.screen);
@@ -35,7 +41,6 @@ export default function App() {
   const toast = useAppStore((s) => s.toast);
   const pendingRevive = useAppStore((s) => s.pendingRevive);
   const runNonce = useAppStore((s) => s.runNonce);
-  const splashProgress = useAppStore((s) => s.splashProgress);
   const reduceMotion = useAppStore((s) => s.reduceMotion);
   const vibrationOn = useAppStore((s) => s.vibrationOn);
   const bootstrap = useAppStore((s) => s.bootstrap);
@@ -45,7 +50,6 @@ export default function App() {
   const setMissions = useAppStore((s) => s.setMissions);
   const refresh = useAppStore((s) => s.refresh);
   const clearPendingRevive = useAppStore((s) => s.clearPendingRevive);
-  const setSplashProgress = useAppStore((s) => s.setSplashProgress);
   const resetHud = useRunStore((s) => s.reset);
 
   const engineRef = useRef<RunnerEngine | null>(null);
@@ -56,6 +60,7 @@ export default function App() {
   const deathHandledRef = useRef(false);
   const prevScreenRef = useRef(screen);
   const lastHudPush = useRef(0);
+  const lastHitRef = useRef(0);
 
   const finishRun = useCallback(
     async (goGameOver: boolean) => {
@@ -86,20 +91,13 @@ export default function App() {
         setMissions(result.missions ?? []);
       } catch {
         enqueueRun(payload);
-        if (p) {
-          setPlayer({
-            ...p,
-            coins: p.coins + payload.coinsEarned,
-            picaPolloTickets: p.picaPolloTickets + payload.picaPolloCollected,
-            lastScore: payload.score,
-            lastMultiplier: payload.multiplierMax,
-            bestScore: Math.max(p.bestScore ?? 0, payload.score),
-            skateboardCharges: engine.skateCharges,
-            totalRuns: (p.totalRuns ?? 0) + 1,
-            isFirstLaunch: false,
-            onboardingSeen: true,
-          });
-        }
+        useAppStore.getState().commitRunToWallet({
+          score: payload.score,
+          multiplier: payload.multiplierMax,
+          sessionCoins: payload.coinsEarned,
+          picaPollo: payload.picaPolloCollected,
+          skateCharges: engine.skateCharges,
+        });
       }
 
       if (goGameOver) setScreen('gameover');
@@ -118,14 +116,7 @@ export default function App() {
       return;
     }
     void bootstrap().then(() => flushRunQueue());
-    let p = 0;
-    const id = window.setInterval(() => {
-      p = Math.min(100, p + 6 + Math.random() * 10);
-      setSplashProgress(p);
-      if (p >= 100) window.clearInterval(id);
-    }, 90);
-    return () => window.clearInterval(id);
-  }, [bootstrap, setScreen, setSplashProgress]);
+  }, [bootstrap, setScreen]);
 
   useEffect(() => {
     const onOnline = () => {
@@ -223,6 +214,9 @@ export default function App() {
           jumping: next.jumping,
           skating: next.skating,
           dead: next.dead,
+          health: next.health,
+          maxHealth: next.maxHealth,
+          lastHitAt: next.lastHitAt,
           x: next.x,
           y: next.y,
           z: next.z,
@@ -233,6 +227,14 @@ export default function App() {
           canEliminate: next.canEliminate,
           nearestLabel: next.nearestPolitician?.label ?? null,
         });
+      }
+
+      if (next.lastHitAt && next.lastHitAt !== lastHitRef.current) {
+        lastHitRef.current = next.lastHitAt;
+        if (!next.dead) {
+          triggerScreenShake(shellRef.current, reduceMotion);
+          triggerHaptic(vibrationOn, 25);
+        }
       }
 
       if (next.dead && !deathHandledRef.current) {
@@ -261,18 +263,39 @@ export default function App() {
     }
   }, [vibrationOn]);
 
-  const onSplashDone = useCallback(() => {
+  const goPostBoot = useCallback(() => {
+    const p = useAppStore.getState().player;
+    if (!hasSeenIntroThisSession()) {
+      setScreen('intro');
+      return;
+    }
+    if (!p?.onboardingSeen) setScreen('onboarding');
+    else setScreen('home');
+  }, [setScreen]);
+
+  const onIntroDone = useCallback(() => {
     const p = useAppStore.getState().player;
     if (!p?.onboardingSeen) setScreen('onboarding');
     else setScreen('home');
   }, [setScreen]);
 
   const runMode = screen === 'runner' || screen === 'pause' || overlay === 'revive';
+  const show3d =
+    screen === 'runner' ||
+    screen === 'pause' ||
+    screen === 'gameover' ||
+    overlay === 'revive';
 
   return (
     <div className="app-frame">
       <div className="app-shell" ref={shellRef}>
-        <RunnerScene mode={runMode ? 'run' : 'idle'} engineRef={engineRef} />
+        <Suspense fallback={null}>
+          {show3d ? (
+            <RunnerScene mode={runMode ? 'run' : 'idle'} engineRef={engineRef} />
+          ) : screen === 'home' || screen === 'onboarding' ? (
+            <RunnerScene mode="idle" engineRef={engineRef} />
+          ) : null}
+        </Suspense>
 
         {screen === 'runner' ? (
           <div className="gesture-layer" ref={gestureRef} aria-hidden />
@@ -281,9 +304,8 @@ export default function App() {
         )}
 
         <div className="ui-layer">
-          {screen === 'splash' && (
-            <SplashScreen progress={splashProgress} onDone={onSplashDone} />
-          )}
+          {screen === 'splash' && <TechPreloadScreen onDone={goPostBoot} />}
+          {screen === 'intro' && <IntroCinematicScreen onDone={onIntroDone} />}
           {screen === 'home' && <HomeHubScreen />}
           {screen === 'onboarding' && <OnboardingOverlay />}
           {screen === 'runner' && <RunnerHUDLive onEliminate={onEliminate} />}
